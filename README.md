@@ -1,6 +1,6 @@
 # AetherNet - Starvortex Authentication System
 
-Authentication interface for the AetherNet platform, part of the Starvortex ecosystem.
+Authentication interface for the AetherNet platform, part of the Starvortex ecosystem. 
 
 ## Structure
 
