@@ -1,0 +1,71 @@
+/* ========================================
+   CUSTOM CURSOR - STARVORTEX STYLE
+   ======================================== */
+
+* {
+    cursor: none !important;
+}
+
+.sv-custom-cursor {
+    position: fixed;
+    width: 32px;
+    height: 32px;
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999999;
+    transition: 
+        width 0.3s ease,
+        height 0.3s ease,
+        border-color 0.3s ease,
+        background-color 0.3s ease;
+    mix-blend-mode: difference;
+}
+
+.sv-custom-cursor-dot {
+    position: fixed;
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 99999999;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    transition: 
+        width 0.2s ease,
+        height 0.2s ease,
+        background-color 0.2s ease;
+}
+
+/* Hover State */
+.sv-custom-cursor.sv-cursor-hover {
+    width: 48px;
+    height: 48px;
+    border-color: rgba(255, 255, 255, 0.8);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sv-custom-cursor-dot.sv-cursor-hover {
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 1);
+}
+
+/* Click State */
+.sv-custom-cursor.sv-cursor-click {
+    width: 24px;
+    height: 24px;
+    border-color: rgba(255, 255, 255, 1);
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.sv-custom-cursor-dot.sv-cursor-click {
+    width: 12px;
+    height: 12px;
+    background: rgba(255, 255, 255, 1);
+}
+
+/* Hide default cursor on all elements */
+a, button, input, textarea, select, [role="button"] {
+    cursor: none !important;
+}

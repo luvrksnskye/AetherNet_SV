@@ -1,0 +1,243 @@
+/* ========================================
+   AETHERNET - AUTHENTICATED STATE
+   ======================================== */
+
+.aethernet-authenticated {
+    position: relative;
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.aethernet-dashboard-placeholder {
+    position: relative;
+    z-index: 10;
+    text-align: center;
+    padding: 3rem;
+    background: var(--aethernet-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--aethernet-border);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.8),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
+    animation: aethernet-fade-in 1s ease-out;
+}
+
+.aethernet-dashboard-title {
+    font-size: clamp(2rem, 6vw, 4rem);
+    font-weight: 700;
+    letter-spacing: 0.3em;
+    color: var(--aethernet-primary);
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(255, 255, 255, 0.6),
+        0 0 30px rgba(255, 255, 255, 0.4);
+    margin-bottom: 1rem;
+    animation: aethernet-glow-pulse 2s ease-in-out infinite;
+}
+
+.aethernet-dashboard-subtitle {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    color: var(--aethernet-secondary);
+    margin-bottom: 2rem;
+}
+
+.aethernet-dashboard-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.75rem;
+    font-size: 0.9rem;
+    letter-spacing: 0.15em;
+    color: var(--aethernet-secondary);
+}
+
+/* ========================================
+   ENHANCED ANIMATIONS
+   ======================================== */
+
+@keyframes aethernet-scan-line {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    10%, 90% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translateY(100vh);
+        opacity: 0;
+    }
+}
+
+/* Scan line effect para el fondo */
+.aethernet-container::before,
+.aethernet-authenticated::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(255, 255, 255, 0.3),
+        transparent
+    );
+    animation: aethernet-scan-line 8s linear infinite;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* Efecto de parpadeo en corners */
+@keyframes aethernet-corner-pulse {
+    0%, 100% {
+        opacity: 1;
+        box-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+    }
+    50% {
+        opacity: 0.6;
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
+    }
+}
+
+.aethernet-corner {
+    animation: aethernet-corner-pulse 3s ease-in-out infinite;
+}
+
+.aethernet-corner-tl {
+    animation-delay: 0s;
+}
+
+.aethernet-corner-tr {
+    animation-delay: 0.75s;
+}
+
+.aethernet-corner-br {
+    animation-delay: 1.5s;
+}
+
+.aethernet-corner-bl {
+    animation-delay: 2.25s;
+}
+
+/* ========================================
+   ENHANCED INPUT STYLES
+   ======================================== */
+
+.aethernet-form-content input:focus {
+    animation: aethernet-input-focus 0.3s ease-out;
+}
+
+@keyframes aethernet-input-focus {
+    0% {
+        box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+    }
+    50% {
+        box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+    }
+    100% {
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    }
+}
+
+/* ========================================
+   BUTTON ENHANCEMENTS
+   ======================================== */
+
+.aethernet-form-content button:active:not(:disabled) {
+    animation: aethernet-button-press 0.1s ease-out;
+}
+
+@keyframes aethernet-button-press {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Ripple effect en botones */
+.aethernet-mode-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    transition: width 0.6s, height 0.6s, opacity 0.6s;
+}
+
+.aethernet-mode-btn:active::after {
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+}
+
+/* ========================================
+   LOADING STATES
+   ======================================== */
+
+.aethernet-loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top-color: var(--aethernet-primary);
+    border-radius: 50%;
+    animation: aethernet-spin 0.8s linear infinite;
+}
+
+@keyframes aethernet-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* ========================================
+   ACCESSIBILITY
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+/* ========================================
+   PRINT STYLES
+   ======================================== */
+
+@media print {
+    .aethernet-video-bg,
+    .aethernet-corner,
+    .aethernet-footer,
+    .sv-custom-cursor,
+    .sv-custom-cursor-dot {
+        display: none !important;
+    }
+    
+    .aethernet-container {
+        background: #fff;
+        color: #000;
+    }
+}

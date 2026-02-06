@@ -1,0 +1,411 @@
+/* ========================================
+   AETHERNET - STARVORTEX AUTHENTICATION
+   ======================================== */
+
+@font-face { 
+    font-family: 'SV-Tech'; 
+    src: url('../../starvortex_assets/tech.ttf') format('truetype'); 
+}
+
+:root {
+    --aethernet-primary: rgba(255, 255, 255, 0.9);
+    --aethernet-secondary: rgba(255, 255, 255, 0.6);
+    --aethernet-border: rgba(255, 255, 255, 0.3);
+    --aethernet-bg: rgba(0, 0, 0, 0.85);
+    --aethernet-glass: rgba(0, 0, 0, 0.7);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'SV-Tech', monospace;
+    color: var(--aethernet-primary);
+    overflow-x: hidden;
+}
+
+/* ========================================
+   CONTAINER
+   ======================================== */
+
+.aethernet-container {
+    position: relative;
+    min-height: 100vh;
+    width: 100vw;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ========================================
+   VIDEO BACKGROUND
+   ======================================== */
+
+.aethernet-video-bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    overflow: hidden;
+}
+
+.aethernet-video-bg video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.aethernet-video-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(0, 0, 0, 0.3) 0%,
+        rgba(0, 0, 0, 0.7) 100%
+    );
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.aethernet-header {
+    position: relative;
+    z-index: 10;
+    padding: 3rem 2rem 2rem;
+    text-align: center;
+}
+
+.aethernet-logo {
+    font-size: clamp(2.5rem, 8vw, 5rem);
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--aethernet-primary);
+    text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.8),
+        0 0 20px rgba(255, 255, 255, 0.6),
+        0 0 30px rgba(255, 255, 255, 0.4);
+    margin-bottom: 0.5rem;
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.aethernet-logo-char {
+    display: inline-block;
+    animation: aethernet-glow-pulse 2s ease-in-out infinite;
+    animation-fill-mode: both;
+}
+
+@keyframes aethernet-glow-pulse {
+    0%, 100% {
+        text-shadow: 
+            0 0 10px rgba(255, 255, 255, 0.8),
+            0 0 20px rgba(255, 255, 255, 0.6),
+            0 0 30px rgba(255, 255, 255, 0.4);
+        opacity: 1;
+    }
+    50% {
+        text-shadow: 
+            0 0 15px rgba(255, 255, 255, 1),
+            0 0 30px rgba(255, 255, 255, 0.8),
+            0 0 45px rgba(255, 255, 255, 0.6);
+        opacity: 0.9;
+    }
+}
+
+.aethernet-subtitle {
+    font-size: clamp(0.7rem, 1.2vw, 1rem);
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    color: var(--aethernet-secondary);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+/* ========================================
+   MAIN CONTENT
+   ======================================== */
+
+.aethernet-main {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+}
+
+.aethernet-form-container {
+    position: relative;
+    width: 100%;
+    max-width: 500px;
+    background: var(--aethernet-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--aethernet-border);
+    box-shadow: 
+        0 8px 32px rgba(0, 0, 0, 0.8),
+        inset 0 0 20px rgba(255, 255, 255, 0.05);
+    padding: 2.5rem;
+    animation: aethernet-fade-in 0.8s ease-out;
+}
+
+@keyframes aethernet-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Corners decorativos */
+.aethernet-corner {
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--aethernet-primary);
+}
+
+.aethernet-corner-tl {
+    top: -1px;
+    left: -1px;
+    border-right: none;
+    border-bottom: none;
+}
+
+.aethernet-corner-tr {
+    top: -1px;
+    right: -1px;
+    border-left: none;
+    border-bottom: none;
+}
+
+.aethernet-corner-bl {
+    bottom: -1px;
+    left: -1px;
+    border-right: none;
+    border-top: none;
+}
+
+.aethernet-corner-br {
+    bottom: -1px;
+    right: -1px;
+    border-left: none;
+    border-top: none;
+}
+
+/* ========================================
+   MODE SWITCH
+   ======================================== */
+
+.aethernet-mode-switch {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    border-bottom: 1px solid var(--aethernet-border);
+}
+
+.aethernet-mode-btn {
+    flex: 1;
+    padding: 0.8rem;
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--aethernet-secondary);
+    font-family: 'SV-Tech', 'Courier New', monospace;
+    font-size: 0.9rem;
+    font-weight: 600;
+    letter-spacing: 0.2em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.aethernet-mode-btn:hover {
+    color: var(--aethernet-primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.aethernet-mode-btn.active {
+    color: var(--aethernet-primary);
+    border-bottom-color: var(--aethernet-primary);
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+}
+
+/* ========================================
+   FORM CONTENT
+   ======================================== */
+
+.aethernet-form-content {
+    min-height: 400px;
+    animation: aethernet-slide-in 0.5s ease-out;
+}
+
+@keyframes aethernet-slide-in {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Override de estilos del LoginForm y RegisterForm */
+.aethernet-form-content .liquid-glass {
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: none;
+    box-shadow: none;
+}
+
+.aethernet-form-content h2 {
+    color: var(--aethernet-primary);
+    font-family: 'SV-Tech', 'Courier New', monospace;
+    text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
+.aethernet-form-content p {
+    color: var(--aethernet-secondary);
+}
+
+.aethernet-form-content input {
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--aethernet-border);
+    color: var(--aethernet-primary);
+    font-family: 'SV-Tech', 'Courier New', monospace;
+}
+
+.aethernet-form-content input:focus {
+    border-color: var(--aethernet-primary);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+}
+
+.aethernet-form-content button {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid var(--aethernet-border);
+    color: var(--aethernet-primary);
+    font-family: 'SV-Tech', 'Courier New', monospace;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    transition: all 0.3s ease;
+}
+
+.aethernet-form-content button:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: var(--aethernet-primary);
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+.aethernet-footer {
+    position: relative;
+    z-index: 10;
+    padding: 1.5rem 2rem;
+    text-align: center;
+    border-top: 1px solid var(--aethernet-border);
+    background: rgba(0, 0, 0, 0.5);
+}
+
+.aethernet-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.aethernet-status-indicator {
+    width: 8px;
+    height: 8px;
+    background: var(--aethernet-primary);
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+    animation: aethernet-blink 1.5s ease-in-out infinite;
+}
+
+@keyframes aethernet-blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.3;
+    }
+}
+
+.aethernet-status-text {
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--aethernet-secondary);
+}
+
+.aethernet-footer-text {
+    font-size: 0.65rem;
+    letter-spacing: 0.25em;
+    color: var(--aethernet-secondary);
+    opacity: 0.7;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 768px) {
+    .aethernet-header {
+        padding: 2rem 1rem 1.5rem;
+    }
+    
+    .aethernet-logo {
+        font-size: clamp(2rem, 10vw, 3rem);
+    }
+    
+    .aethernet-subtitle {
+        font-size: clamp(0.6rem, 1.5vw, 0.8rem);
+    }
+    
+    .aethernet-form-container {
+        padding: 1.5rem;
+    }
+    
+    .aethernet-mode-switch {
+        gap: 0.5rem;
+    }
+    
+    .aethernet-mode-btn {
+        padding: 0.6rem;
+        font-size: 0.8rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .aethernet-main {
+        padding: 1rem;
+    }
+    
+    .aethernet-form-container {
+        padding: 1.25rem;
+    }
+    
+    .aethernet-corner {
+        width: 15px;
+        height: 15px;
+    }
+}
