@@ -1,20 +1,59 @@
 import { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
+import { useSVSounds } from '../../hooks/useSVSounds';
+
+const BASE = import.meta.env.BASE_URL;
+
+const SYMBOLS = [
+  `${BASE}starvortex_assets/exp_symbol_exposition.webm`,
+  `${BASE}starvortex_assets/exp_symbol_focus.webm`,
+  `${BASE}starvortex_assets/exp_symbol_mark.webm`,
+  `${BASE}starvortex_assets/exp_symbol_portal.webm`,
+];
+
+const SCRAMBLE_CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%';
+const TARGET_WORD = 'STARVORTEX';
+const SCRAMBLE_SPEED = 20;
+const SCRAMBLE_INCREMENT = 2;
 
 interface SplashScreenProps {
   onComplete: () => void;
 }
 
+const SYMBOL_CELLS: Record<number, number> = {
+  0: 0,
+  3: 1,
+  5: 2,
+  8: 3,
+  11: 0,
+};
+
+const CORNER_CLASSES: Record<number, string> = {
+  0: 'sv-cell-corner-tl',
+  3: 'sv-cell-corner-tr',
+  8: 'sv-cell-corner-bl',
+  11: 'sv-cell-corner-br',
+};
+
 export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const vortexRef = useRef<SVGSVGElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const gridRef = useRef<HTMLDivElement>(null);
   const [phase, setPhase] = useState<'vortex' | 'title' | 'tagline'>('vortex');
+  const { play, preload } = useSVSounds();
 
   useEffect(() => {
+    preload('scan');
+    preload('hint');
+    preload('click');
+    preload('affirmation');
+
     const vortex = vortexRef.current;
     if (!vortex) return;
 
     requestAnimationFrame(() => vortex.classList.add('revealed'));
+    setTimeout(() => play('scan', 0.4), 300);
 
     const fadeTimer = setTimeout(() => {
       gsap.to(vortex, {
@@ -24,44 +63,77 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
       });
     }, 2500);
 
-    const scanSFX = new Audio('/src/sfx/scan-zoom.wav');
-    const affirmSFX = new Audio('/src/sfx/affirmation-tech.wav');
-    setTimeout(() => scanSFX.play().catch(() => {}), 300);
-    setTimeout(() => affirmSFX.play().catch(() => {}), 2800);
-
     return () => clearTimeout(fadeTimer);
-  }, []);
+  }, [play, preload]);
 
   useEffect(() => {
-    if (phase === 'title') {
-      gsap.timeline()
-        .fromTo(
-          '.sv-splash-char',
-          { opacity: 0, y: 50 },
-          { opacity: 1, y: 0, stagger: 0.05, duration: 0.8, ease: 'back.out(1.7)' }
-        )
-        .call(() => setPhase('tagline'), [], '+=0.1');
-    }
+    if (phase !== 'title') return;
 
-    if (phase === 'tagline') {
-      gsap.fromTo(
-        '.sv-splash-tagline',
-        { opacity: 0, y: 20 },
-        {
-          opacity: 1,
-          y: 0,
-          duration: 0.6,
-          onComplete: () => {
-            gsap.to(containerRef.current, {
-              opacity: 0,
-              duration: 0.8,
-              delay: 1,
-              onComplete: onComplete,
-            });
-          },
-        }
-      );
-    }
+    const grid = gridRef.current;
+    const title = titleRef.current;
+    if (!grid || !title) return;
+
+    grid.classList.add('visible');
+    play('hint', 0.3);
+
+    const chars = title.querySelectorAll<HTMLSpanElement>('.sv-splash-char');
+    chars.forEach((el) => {
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    });
+    title.classList.add('scrambling');
+
+    let resolved = 0;
+    let frame = 0;
+
+    const scrambleInterval = setInterval(() => {
+      frame++;
+
+      chars.forEach((el, i) => {
+        if (i < resolved) return;
+        el.textContent = SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+      });
+
+      if (frame % SCRAMBLE_INCREMENT === 0 && resolved < TARGET_WORD.length) {
+        const el = chars[resolved];
+        el.textContent = TARGET_WORD[resolved];
+        el.classList.add('resolved');
+        play('click', 0.15);
+        resolved++;
+      }
+
+      if (resolved >= TARGET_WORD.length) {
+        clearInterval(scrambleInterval);
+        title.classList.remove('scrambling');
+        play('affirmation', 0.4);
+        setTimeout(() => setPhase('tagline'), 400);
+      }
+    }, SCRAMBLE_SPEED);
+
+    return () => clearInterval(scrambleInterval);
+  }, [phase, play]);
+
+  useEffect(() => {
+    if (phase !== 'tagline') return;
+
+    gsap.fromTo(
+      '.sv-splash-tagline',
+      { opacity: 0, y: 20 },
+      {
+        opacity: 1,
+        y: 0,
+        duration: 0.6,
+        onComplete: () => {
+          gridRef.current?.classList.add('fading');
+          gsap.to(containerRef.current, {
+            opacity: 0,
+            duration: 0.8,
+            delay: 1.2,
+            onComplete: onComplete,
+          });
+        },
+      }
+    );
   }, [phase, onComplete]);
 
   return (
@@ -121,10 +193,34 @@ export const SplashScreen: React.FC<SplashScreenProps> = ({ onComplete }) => {
         </g>
       </svg>
 
+      <div
+        ref={gridRef}
+        className="sv-splash-symbol-grid"
+        style={{ display: phase === 'vortex' ? 'none' : 'grid' }}
+      >
+        {Array.from({ length: 12 }, (_, i) => {
+          const symbolIdx = SYMBOL_CELLS[i];
+          const corner = CORNER_CLASSES[i] || '';
+          const hasSymbol = symbolIdx !== undefined;
+          return (
+            <div
+              key={i}
+              className={`sv-symbol-cell ${hasSymbol ? 'sv-cell-active' : ''} ${corner}`}
+            >
+              {hasSymbol && (
+                <video autoPlay muted loop playsInline>
+                  <source src={SYMBOLS[symbolIdx]} type="video/webm" />
+                </video>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
       {phase !== 'vortex' && (
         <div className="sv-splash-title-wrap">
-          <h1 className="sv-splash-title">
-            {'STARVORTEX'.split('').map((char, i) => (
+          <h1 ref={titleRef} className="sv-splash-title">
+            {TARGET_WORD.split('').map((char, i) => (
               <span key={i} className="sv-splash-char">
                 {char}
               </span>

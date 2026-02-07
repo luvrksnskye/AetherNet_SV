@@ -23,20 +23,17 @@ export const useSVSounds = () => {
     }
   }, []);
 
-  const play = useCallback(
-    (key: SFXKey, volume = 0.5) => {
-      try {
-        if (!cache.current.has(key)) preload(key);
-        const audio = cache.current.get(key);
-        if (audio) {
-          audio.volume = volume;
-          audio.currentTime = 0;
-          audio.play().catch(() => {});
-        }
-      } catch {}
-    },
-    [preload]
-  );
+  const play = useCallback((key: SFXKey, volume = 0.5) => {
+    try {
+      if (!cache.current.has(key)) preload(key);
+      const audio = cache.current.get(key);
+      if (audio) {
+        audio.volume = volume;
+        audio.currentTime = 0;
+        audio.play().catch(() => {});
+      }
+    } catch {}
+  }, [preload]);
 
   return { play, preload };
 };
