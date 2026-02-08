@@ -3,9 +3,9 @@ import { SplashScreen } from './SplashScreen';
 import { SVCursor } from './SVCursor';
 import { LoginForm } from '../features/LoginForm';
 import { RegisterForm } from '../features/RegisterForm';
-import { ConfirmModal } from '../layout/ConfirmModal';
+import { Dashboard } from '../features/Dashboard';
 import { useSVSounds } from '../../hooks/useSVSounds';
-import type { AuthMode, ModalData } from '../../types/auth';
+import type { AuthMode } from '../../types/auth';
 import '../../styles/aethernet.css';
 
 const VIDEO_BG =
@@ -14,7 +14,6 @@ const VIDEO_BG =
 export const AetherNetApp = () => {
   const [showSplash, setShowSplash] = useState(true);
   const [authMode, setAuthMode] = useState<AuthMode>('login');
-  const [modalData, setModalData] = useState<ModalData | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { play, preload } = useSVSounds();
 
@@ -24,28 +23,15 @@ export const AetherNetApp = () => {
     preload('scan');
   }, [preload]);
 
-  const handleShowConfirm = (data: ModalData) => {
-    setModalData(data);
-    play('hint');
-  };
-
-  const handleConfirm = () => {
-    if (modalData && window.handleModalConfirm) {
-      window.handleModalConfirm(modalData.data, modalData.age);
-    }
-    setModalData(null);
-    play('affirmation');
-  };
-
-  const handleDiscard = () => {
-    if (window.handleModalCancel) window.handleModalCancel();
-    setModalData(null);
-    play('click');
-  };
-
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
     play('affirmation');
+  };
+
+  const handleLogout = () => {
+    setIsAuthenticated(false);
+    setAuthMode('login');
+    play('click');
   };
 
   const handleModeSwitch = (mode: AuthMode) => {
@@ -71,18 +57,9 @@ export const AetherNetApp = () => {
           </video>
           <div className="sv-video-overlay" />
         </div>
-        <div className="sv-dashboard">
-          <div className="sv-corner sv-corner-tl" />
-          <div className="sv-corner sv-corner-tr" />
-          <div className="sv-corner sv-corner-bl" />
-          <div className="sv-corner sv-corner-br" />
-          <h1 className="sv-dashboard-title">AETHERNET</h1>
-          <p className="sv-dashboard-subtitle">SYSTEM OPERATIONAL</p>
-          <div className="sv-dashboard-status">
-            <span className="sv-status-dot" />
-            <span>CONNECTION ESTABLISHED</span>
-          </div>
-        </div>
+        <div className="sv-pattern-bg" />
+        <div className="sv-scanline" />
+        <Dashboard onSound={onSound} onLogout={handleLogout} />
       </div>
     );
   }
@@ -118,9 +95,7 @@ export const AetherNetApp = () => {
             <span className="sv-logo-ghost sv-logo-ghost-1">AETHERNET</span>
             <h1 className="sv-logo">
               {'AETHERNET'.split('').map((char, i) => (
-                <span key={i} className="sv-logo-char">
-                  {char}
-                </span>
+                <span key={i} className="sv-logo-char">{char}</span>
               ))}
             </h1>
             <span className="sv-logo-ghost sv-logo-ghost-2">AETHERNET</span>
@@ -153,14 +128,9 @@ export const AetherNetApp = () => {
             </div>
 
             {authMode === 'login' ? (
-              <LoginForm setAuthMode={setAuthMode} onSound={onSound} />
+              <LoginForm setAuthMode={setAuthMode} onLoginSuccess={handleLoginSuccess} onSound={onSound} />
             ) : (
-              <RegisterForm
-                setAuthMode={setAuthMode}
-                onShowConfirm={handleShowConfirm}
-                onLoginSuccess={handleLoginSuccess}
-                onSound={onSound}
-              />
+              <RegisterForm setAuthMode={setAuthMode} onLoginSuccess={handleLoginSuccess} onSound={onSound} />
             )}
           </div>
         </main>
@@ -173,8 +143,6 @@ export const AetherNetApp = () => {
           <p className="sv-footer-tagline">ONE FORCE BEHIND TOMORROW'S SYSTEMS</p>
         </footer>
       </div>
-
-      <ConfirmModal data={modalData} onConfirm={handleConfirm} onCancel={handleDiscard} />
     </>
   );
 };

@@ -4,6 +4,7 @@ import type { AuthMode } from '../../types/auth';
 
 interface LoginFormProps {
   setAuthMode: (m: AuthMode) => void;
+  onLoginSuccess: () => void;
   onSound: (key: 'click' | 'hover') => void;
 }
 
@@ -18,7 +19,7 @@ interface LoginState {
   loading: boolean;
 }
 
-export const LoginForm: React.FC<LoginFormProps> = ({ setAuthMode, onSound }) => {
+export const LoginForm: React.FC<LoginFormProps> = ({ setAuthMode, onLoginSuccess, onSound }) => {
   const [s, setS] = useState<LoginState>({
     method: 'phone',
     phone: '',
@@ -47,7 +48,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({ setAuthMode, onSound }) =>
       return;
     }
     setS((p) => ({ ...p, loading: true }));
-    setTimeout(() => setS((p) => ({ ...p, loading: false })), 2000);
+    // TODO: replace with real login API
+    setTimeout(() => {
+      setS((p) => ({ ...p, loading: false }));
+      onLoginSuccess();
+    }, 1500);
   };
 
   const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {

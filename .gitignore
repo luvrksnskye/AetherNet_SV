@@ -37,3 +37,5 @@ vite.config.js
 tsconfig.app.json
 tsconfig.app.json
 vite.config.ts
+
+.env

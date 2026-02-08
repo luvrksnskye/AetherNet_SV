@@ -1,5 +1,3 @@
-import type { CurpData } from '../types/auth';
-
 export const formatPhoneNumber = (value: string): string => {
   const digits = value.replace(/\D/g, '');
   const limited = digits.slice(0, 10);
@@ -17,23 +15,18 @@ export const getRawPhone = (formatted: string): string => {
 export const isValidEmail = (email: string): boolean =>
   /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-export const calculateAge = (birthDateString: string): number => {
-  const [day, month, year] = birthDateString.split('/').map(Number);
-  const today = new Date();
-  let age = today.getFullYear() - year;
-  const m = today.getMonth() + 1 - month;
-  if (m < 0 || (m === 0 && today.getDate() < day)) age--;
-  return age;
-};
-
 export const getValidationError = (
   field: string,
   value: string,
   confirmValue?: string
 ): string => {
   switch (field) {
-    case 'zipCode':
-      return value && value.length < 5 ? 'INCOMPLETE' : '';
+    case 'name':
+      return value.length > 0 && value.length < 2 ? 'TOO SHORT' : '';
+    case 'age': {
+      const n = Number(value);
+      return value && (isNaN(n) || n < 1 || n > 150) ? 'INVALID' : '';
+    }
     case 'phone': {
       const raw = getRawPhone(value);
       return value && raw.length < 10 ? 'INCOMPLETE' : '';
@@ -49,43 +42,28 @@ export const getValidationError = (
   }
 };
 
-export const fetchCurpData = async (curp: string): Promise<CurpData> => {
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      resolve({
-        curp: curp.toUpperCase(),
-        name: 'OPERATIVE',
-        lastNameA: 'STARVORTEX',
-        lastNameB: 'SYSTEMS',
-        gender: 'CLASSIFIED',
-        birthDate: '15/08/1995',
-        state: 'SECTOR-7',
-      });
-    }, 1500);
-  });
-};
-
-export const registerPersonalAccount = async (data: {
+/**
+ * POST /users to register a new user.
+ * ipAddress is resolved server-side or defaults to 127.0.0.1.
+ */
+export const registerUser = async (data: {
   name: string;
-  age: number | null;
+  age: number;
   gender: string;
   email: string;
   phoneNo: string;
-  zipCode: string;
-  macAddress?: string;
   pwd: string;
 }): Promise<{ success: boolean }> => {
-  const base = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_BACKEND_URL) || 'http://localhost:8082';
-  const url = `${base.replace(/\/$/, '')}/auth/personal/register`;
+  const base = (typeof import.meta !== 'undefined' && import.meta.env?.VITE_BACKEND_URL) || 'http://localhost:8080';
+  const url = `${base.replace(/\/$/, '')}/users`;
 
   const payload = {
     name: data.name,
-    age: data.age ?? 0,
+    age: data.age,
     gender: data.gender,
     email: data.email,
     phoneNo: data.phoneNo,
-    zipCode: data.zipCode,
-    macAddress: data.macAddress ?? getOrCreatePseudoMac(),
+    ipAddress: '127.0.0.1',
     pwd: data.pwd,
   };
 
@@ -99,19 +77,4 @@ export const registerPersonalAccount = async (data: {
   if (res.ok) return { success: true };
   const text = await res.text().catch(() => '');
   throw new Error(`Registration failed: ${res.status} ${text}`);
-};
-
-const getOrCreatePseudoMac = (): string => {
-  try {
-    const key = 'sv_device_mac';
-    const existing = localStorage.getItem(key);
-    if (existing) return existing;
-    const bytes = new Uint8Array(6);
-    crypto.getRandomValues(bytes);
-    const mac = Array.from(bytes).map((b) => b.toString(16).padStart(2, '0')).join(':');
-    localStorage.setItem(key, mac);
-    return mac;
-  } catch {
-    return '00:00:00:00:00:00';
-  }
 };

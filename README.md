@@ -1,6 +1,5 @@
-# AetherNet - Starvortex Authentication System
 
-Authentication interface for the AetherNet platform, part of the Starvortex ecosystem. 
+# AetherNet — Starvortex Authentication System
 
 ## Structure
 
@@ -8,26 +7,29 @@ Authentication interface for the AetherNet platform, part of the Starvortex ecos
 src/
   components/
     aethernet/    AetherNetApp, SplashScreen, SVCursor
-    features/     LoginForm, RegisterForm
-    layout/       ConfirmModal
+    features/     LoginForm, RegisterForm, Dashboard
   hooks/          useSVCursor, useSVSounds
   styles/         aethernet.css
   types/          auth.ts
-  utils/          validators, formatters, API calls
+  utils/          index.ts
 public/
-
+  sfx/          
+                
 ```
-
 ## API
 
-Registration sends POST to `{VITE_BACKEND_URL}/auth/personal/register` with:
+**Register** — `POST /users`
 
 ```json
-{ "name", "age", "gender", "email", "phoneNo", "zipCode", "macAddress", "pwd" }
+{
+  "name": "Admin Aether",
+  "age": 18,
+  "gender": "M",
+  "email": "admin@aethernet.com",
+  "phoneNo": "5555555555",
+  "ipAddress": "127.0.0.1",
+  "pwd": "supersecretpassword"
+}
 ```
 
-CURP validation currently uses mock data. Replace `fetchCurpData` in `utils/index.ts` with actual endpoint.
-
-## License
-
-Starvortex Systems - Internal use.
+**Login** — Not yet wired to backend (mock 1.5s delay, always succeeds).
