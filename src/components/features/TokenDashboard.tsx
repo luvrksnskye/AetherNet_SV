@@ -23,20 +23,15 @@ export const TokenDashboard: React.FC<TokenDashboardProps> = ({ onSound }) => {
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    (async () => {
-      const saved = await storage.get<TokenEntry[]>(STORAGE_KEY);
-      if (saved) setEntries(saved);
-      setLoaded(true);
-    })();
-  }, [storage]);
+    const saved = storage.get<TokenEntry[]>(STORAGE_KEY);
+    if (saved) setEntries(saved);
+    setLoaded(true);
+  }, []);
 
-  const save = useCallback(
-    async (next: TokenEntry[]) => {
-      setEntries(next);
-      await storage.set(STORAGE_KEY, next);
-    },
-    [storage],
-  );
+  const save = useCallback((next: TokenEntry[]) => {
+    setEntries(next);
+    storage.set(STORAGE_KEY, next);
+  }, []);
 
   const todayCount = entries.filter((e) => isToday(e.date)).length;
   const weekEntries = entries.filter((e) => isThisWeek(e.date));
@@ -60,7 +55,7 @@ export const TokenDashboard: React.FC<TokenDashboardProps> = ({ onSound }) => {
     return colorCount < ceiling;
   };
 
-  const handleBurn = async () => {
+  const handleBurn = () => {
     if (!selectedColor || !description.trim()) return;
     onSound('click');
 
@@ -71,15 +66,15 @@ export const TokenDashboard: React.FC<TokenDashboardProps> = ({ onSound }) => {
       description: description.trim(),
     };
 
-    await save([entry, ...entries]);
+    save([entry, ...entries]);
     setSelectedColor(null);
     setDescription('');
     setBurning(false);
   };
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     onSound('click');
-    await save(entries.filter((e) => e.id !== id));
+    save(entries.filter((e) => e.id !== id));
   };
 
   const colorClass = (color: TokenColor) => `sv-token-${color}`;

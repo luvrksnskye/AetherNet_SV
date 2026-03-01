@@ -5,12 +5,12 @@ import { generateId, getToday } from '../../utils';
 interface TimerLog {
   id: string;
   date: string;
-  duration: number; // seconds
+  duration: number;
   mode: 'stopwatch' | 'pomodoro' | 'countdown';
   label: string;
 }
 
-const POMODORO_WORK = 45 * 60; // 45 min = 1 token JIT
+const POMODORO_WORK = 45 * 60;
 const POMODORO_BREAK = 10 * 60;
 
 type TimerMode = 'stopwatch' | 'pomodoro' | 'countdown';
@@ -38,11 +38,9 @@ export const Stopwatch: React.FC<Props> = ({ onSound }) => {
   const intervalRef = useRef<number | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const saved = await storage.get<TimerLog[]>('timer:logs');
-      if (saved) setLogs(saved);
-    })();
-  }, [storage]);
+    const saved = storage.get<TimerLog[]>('timer:logs');
+    if (saved) setLogs(saved);
+  }, []);
 
   const tick = useCallback(() => {
     setElapsed((prev) => {
@@ -94,7 +92,7 @@ export const Stopwatch: React.FC<Props> = ({ onSound }) => {
     if (mode === 'countdown') setTarget(Number(countdownInput) * 60 || 25 * 60);
   };
 
-  const saveLog = async () => {
+  const saveLog = () => {
     if (elapsed < 5) return;
     onSound('click');
     const entry: TimerLog = {
@@ -106,7 +104,7 @@ export const Stopwatch: React.FC<Props> = ({ onSound }) => {
     };
     const next = [entry, ...logs].slice(0, 50);
     setLogs(next);
-    await storage.set('timer:logs', next);
+    storage.set('timer:logs', next);
     reset();
     setLabel('');
   };

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { TokenDashboard } from '../features/TokenDashboard';
 import { RoadmapDashboard } from '../features/RoadmapDashboard';
 import { NotesPanel } from '../features/NotesPanel';
@@ -32,11 +32,24 @@ const NAV_ITEMS: { id: DashboardView; label: string; icon: string }[] = [
 export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
   const [view, setView] = useState<DashboardView>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [shellReady, setShellReady] = useState(false);
 
-  const navigate = (v: DashboardView) => {
-    setView(v);
-    onSound('click');
-  };
+  // Defer heavy components until shell is painted
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        setShellReady(true);
+      });
+    });
+  }, []);
+
+  const navigate = useCallback(
+    (v: DashboardView) => {
+      setView(v);
+      onSound('click');
+    },
+    [onSound]
+  );
 
   const renderContent = () => {
     switch (view) {
@@ -88,7 +101,10 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
             </div>
             <button
               className="sv-sidebar-toggle"
-              onClick={() => { setSidebarOpen(!sidebarOpen); onSound('click'); }}
+              onClick={() => {
+                setSidebarOpen(!sidebarOpen);
+                onSound('click');
+              }}
               onMouseEnter={() => onSound('hover')}
             >
               {sidebarOpen ? '\u25C0' : '\u25B6'}
@@ -124,7 +140,10 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
             </div>
             <button
               className="sv-sidebar-logout"
-              onClick={() => { onSound('click'); onLogout(); }}
+              onClick={() => {
+                onSound('click');
+                onLogout();
+              }}
               onMouseEnter={() => onSound('hover')}
             >
               {sidebarOpen ? 'DESCONECTAR' : '\u23FB'}
@@ -151,7 +170,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
         </main>
       </div>
 
-      <MusicPlayer onSound={onSound} />
+      {shellReady && <MusicPlayer onSound={onSound} />}
     </div>
   );
 };

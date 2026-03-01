@@ -7,6 +7,7 @@ export const useSVCursor = () => {
   const cursorX = useRef(0);
   const cursorY = useRef(0);
   const rafId = useRef<number>(0);
+  const listenersMap = useRef<WeakSet<Element>>(new WeakSet());
 
   const animate = useCallback(() => {
     cursorX.current += (mouseX.current - cursorX.current) * 0.15;
@@ -18,9 +19,13 @@ export const useSVCursor = () => {
   }, []);
 
   useEffect(() => {
-    const onMove = (e: MouseEvent) => { mouseX.current = e.clientX; mouseY.current = e.clientY; };
+    const onMove = (e: MouseEvent) => {
+      mouseX.current = e.clientX;
+      mouseY.current = e.clientY;
+    };
     const onDown = () => cursorRef.current?.classList.add('click');
     const onUp = () => cursorRef.current?.classList.remove('click');
+
     const onEnter = () => cursorRef.current?.classList.add('hover');
     const onLeave = () => cursorRef.current?.classList.remove('hover');
 
@@ -28,15 +33,26 @@ export const useSVCursor = () => {
     document.addEventListener('mousedown', onDown);
     document.addEventListener('mouseup', onUp);
 
-    const observe = () => {
-      document.querySelectorAll('button, input, a, select, textarea, [role="button"]').forEach((el) => {
-        el.addEventListener('mouseenter', onEnter);
-        el.addEventListener('mouseleave', onLeave);
+    const attachListeners = () => {
+      const elements = document.querySelectorAll(
+        'button, input, a, select, textarea, [role="button"]'
+      );
+      elements.forEach((el) => {
+        if (!listenersMap.current.has(el)) {
+          listenersMap.current.add(el);
+          el.addEventListener('mouseenter', onEnter);
+          el.addEventListener('mouseleave', onLeave);
+        }
       });
     };
-    observe();
-    const observer = new MutationObserver(observe);
+
+    attachListeners();
+
+    const observer = new MutationObserver(() => {
+      requestAnimationFrame(attachListeners);
+    });
     observer.observe(document.body, { childList: true, subtree: true });
+
     rafId.current = requestAnimationFrame(animate);
 
     return () => {

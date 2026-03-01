@@ -47,16 +47,14 @@ export const DragLists: React.FC<Props> = ({ onSound }) => {
   const dragTarget = useRef<{ listId: string; itemIdx: number } | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const saved = await storage.get<DragListsConfig>(STORAGE_KEY);
-      if (saved) setConfig(saved);
-    })();
-  }, [storage]);
+    const saved = storage.get<DragListsConfig>(STORAGE_KEY);
+    if (saved) setConfig(saved);
+  }, []);
 
-  const save = useCallback(async (next: DragListsConfig) => {
+  const save = useCallback((next: DragListsConfig) => {
     setConfig(next);
-    await storage.set(STORAGE_KEY, next);
-  }, [storage]);
+    storage.set(STORAGE_KEY, next);
+  }, []);
 
   const addItem = (listId: string) => {
     const text = newItemText[listId]?.trim();
@@ -170,7 +168,6 @@ export const DragLists: React.FC<Props> = ({ onSound }) => {
               <button className="sv-btn sv-btn-success" onClick={() => addItem(list.id)} disabled={!newItemText[list.id]?.trim()} onMouseEnter={() => onSound('hover')}>+</button>
             </div>
 
-            {/* Visual connection line */}
             <svg className="sv-draglist-connector" viewBox="0 0 20 60" preserveAspectRatio="none">
               <path d="M10 0 Q10 30 10 60" stroke="rgba(255,255,255,0.12)" strokeWidth="2" fill="none" strokeDasharray="4 4">
                 <animate attributeName="stroke-dashoffset" values="0;8" dur="1s" repeatCount="indefinite" />
@@ -179,7 +176,6 @@ export const DragLists: React.FC<Props> = ({ onSound }) => {
           </div>
         ))}
 
-        {/* Add new list */}
         <div className="sv-draglist sv-draglist-new">
           <input className="sv-input" type="text" placeholder="NUEVA LISTA..." value={newListTitle} onChange={(e) => setNewListTitle(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addList()} />
           <button className="sv-btn" onClick={addList} disabled={!newListTitle.trim()} onMouseEnter={() => onSound('hover')}>+ LISTA</button>

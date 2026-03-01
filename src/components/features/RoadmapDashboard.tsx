@@ -24,20 +24,15 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
   const phases = branch === 'axiom-core' ? AXIOM_CORE_PHASES : COMPUTATIONAL_PHASES;
 
   useEffect(() => {
-    (async () => {
-      const saved = await storage.get<Record<string, RoadmapProgress>>(STORAGE_KEY);
-      if (saved) setProgress(saved);
-      setLoaded(true);
-    })();
-  }, [storage]);
+    const saved = storage.get<Record<string, RoadmapProgress>>(STORAGE_KEY);
+    if (saved) setProgress(saved);
+    setLoaded(true);
+  }, []);
 
-  const save = useCallback(
-    async (next: Record<string, RoadmapProgress>) => {
-      setProgress(next);
-      await storage.set(STORAGE_KEY, next);
-    },
-    [storage],
-  );
+  const save = useCallback((next: Record<string, RoadmapProgress>) => {
+    setProgress(next);
+    storage.set(STORAGE_KEY, next);
+  }, []);
 
   const getStatus = (phaseId: string) =>
     progress[phaseId]?.status || 'locked';
@@ -45,7 +40,7 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
   const getCompleted = (phaseId: string) =>
     progress[phaseId]?.completedTopics || [];
 
-  const toggleTopic = async (phaseId: string, topic: string) => {
+  const toggleTopic = (phaseId: string, topic: string) => {
     onSound('click');
     const current = progress[phaseId] || {
       phaseId,
@@ -72,23 +67,23 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
         completedDate: allDone ? new Date().toISOString().split('T')[0] : undefined,
       },
     };
-    await save(next);
+    save(next);
   };
 
-  const updateNotes = async (phaseId: string, notes: string) => {
+  const updateNotes = (phaseId: string, notes: string) => {
     const current = progress[phaseId] || {
       phaseId,
       status: 'active' as const,
       completedTopics: [],
       notes: '',
     };
-    await save({
+    save({
       ...progress,
       [phaseId]: { ...current, notes },
     });
   };
 
-  const activatePhase = async (phaseId: string) => {
+  const activatePhase = (phaseId: string) => {
     onSound('click');
     const current = progress[phaseId] || {
       phaseId,
@@ -97,7 +92,7 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
       notes: '',
     };
     if (current.status === 'locked') {
-      await save({
+      save({
         ...progress,
         [phaseId]: {
           ...current,
@@ -132,22 +127,14 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
       <div className="sv-method-toggle">
         <button
           className={`sv-method-btn ${branch === 'axiom-core' ? 'active' : ''}`}
-          onClick={() => {
-            setBranch('axiom-core');
-            setExpanded(null);
-            onSound('click');
-          }}
+          onClick={() => { setBranch('axiom-core'); setExpanded(null); onSound('click'); }}
           onMouseEnter={() => onSound('hover')}
         >
           AXIOM CORE
         </button>
         <button
           className={`sv-method-btn ${branch === 'computational' ? 'active' : ''}`}
-          onClick={() => {
-            setBranch('computational');
-            setExpanded(null);
-            onSound('click');
-          }}
+          onClick={() => { setBranch('computational'); setExpanded(null); onSound('click'); }}
           onMouseEnter={() => onSound('hover')}
         >
           COMPUTATIONAL
@@ -157,9 +144,7 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
       <div className="sv-roadmap-progress-bar">
         <div className="sv-field-label">
           <span>PROGRESO GENERAL</span>
-          <span>
-            {completedPhases}/{totalPhases} FASES
-          </span>
+          <span>{completedPhases}/{totalPhases} FASES</span>
         </div>
         <div className="sv-token-bar">
           <div
@@ -180,16 +165,10 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
               : 0;
 
           return (
-            <div
-              key={phase.id}
-              className={`sv-roadmap-phase sv-phase-${status}`}
-            >
+            <div key={phase.id} className={`sv-roadmap-phase sv-phase-${status}`}>
               <button
                 className="sv-roadmap-phase-header"
-                onClick={() => {
-                  setExpanded(isExpanded ? null : phase.id);
-                  onSound('click');
-                }}
+                onClick={() => { setExpanded(isExpanded ? null : phase.id); onSound('click'); }}
                 onMouseEnter={() => onSound('hover')}
               >
                 <div className="sv-roadmap-phase-left">
@@ -203,37 +182,23 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
                 </div>
                 <div className="sv-roadmap-phase-right">
                   <span className={`sv-node-badge sv-node-${status === 'completed' ? 'active' : status === 'active' ? 'standby' : 'critical'}`}>
-                    {status === 'completed'
-                      ? 'COMPLETADO'
-                      : status === 'active'
-                        ? 'EN CURSO'
-                        : 'BLOQUEADO'}
+                    {status === 'completed' ? 'COMPLETADO' : status === 'active' ? 'EN CURSO' : 'BLOQUEADO'}
                   </span>
-                  <span className="sv-roadmap-arrow">
-                    {isExpanded ? '\u25B4' : '\u25BE'}
-                  </span>
+                  <span className="sv-roadmap-arrow">{isExpanded ? '\u25B4' : '\u25BE'}</span>
                 </div>
               </button>
 
               {isExpanded && (
                 <div className="sv-roadmap-phase-body">
                   {status === 'locked' && (
-                    <button
-                      className="sv-btn"
-                      onClick={() => activatePhase(phase.id)}
-                      onMouseEnter={() => onSound('hover')}
-                    >
+                    <button className="sv-btn" onClick={() => activatePhase(phase.id)} onMouseEnter={() => onSound('hover')}>
                       ACTIVAR FASE
                     </button>
                   )}
 
                   <div className="sv-roadmap-tactical">
-                    <div className="sv-field-label">
-                      <span>VALOR TACTICO</span>
-                    </div>
-                    <p className="sv-roadmap-tactical-text">
-                      {phase.tacticalValue}
-                    </p>
+                    <div className="sv-field-label"><span>VALOR TACTICO</span></div>
+                    <p className="sv-roadmap-tactical-text">{phase.tacticalValue}</p>
                   </div>
 
                   {status !== 'locked' && (
@@ -241,22 +206,15 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
                       <div className="sv-roadmap-topics">
                         <div className="sv-field-label">
                           <span>MODULOS</span>
-                          <span>
-                            {completed.length}/{phase.topics.length}
-                          </span>
+                          <span>{completed.length}/{phase.topics.length}</span>
                         </div>
                         <div className="sv-token-bar" style={{ marginBottom: '0.5rem' }}>
-                          <div
-                            className="sv-token-bar-fill sv-bar-success"
-                            style={{ width: `${topicProgress}%` }}
-                          />
+                          <div className="sv-token-bar-fill sv-bar-success" style={{ width: `${topicProgress}%` }} />
                         </div>
                         {phase.topics.map((topic) => (
                           <button
                             key={topic}
-                            className={`sv-roadmap-topic ${
-                              completed.includes(topic) ? 'completed' : ''
-                            }`}
+                            className={`sv-roadmap-topic ${completed.includes(topic) ? 'completed' : ''}`}
                             onClick={() => toggleTopic(phase.id, topic)}
                             onMouseEnter={() => onSound('hover')}
                           >
@@ -269,9 +227,7 @@ export const RoadmapDashboard: React.FC<RoadmapDashboardProps> = ({ onSound }) =
                       </div>
 
                       <div className="sv-field">
-                        <div className="sv-field-label">
-                          <span>NOTAS DE FASE</span>
-                        </div>
+                        <div className="sv-field-label"><span>NOTAS DE FASE</span></div>
                         <textarea
                           className="sv-input sv-textarea"
                           placeholder="Registrar observaciones, recursos, bloqueos..."

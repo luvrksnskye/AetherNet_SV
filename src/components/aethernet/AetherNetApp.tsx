@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { PreloadScreen } from './PreloadScreen';
 import { SplashScreen } from './SplashScreen';
 import { SVCursor } from './SVCursor';
@@ -15,41 +15,55 @@ type AppPhase = 'preload' | 'splash' | 'auth' | 'app';
 export const AetherNetApp = () => {
   const [phase, setPhase] = useState<AppPhase>('preload');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
   const { play, preload } = useSVSounds();
 
   useEffect(() => {
     preload('click');
     preload('hover');
     preload('scan');
+    preload('affirmation');
+    preload('hint');
   }, [preload]);
 
-  const handleLoginSuccess = () => {
-    setIsAuthenticated(true);
-    setPhase('app');
+  const handleLoginSuccess = useCallback(() => {
+    setTransitioning(true);
     play('affirmation');
-  };
 
-  const handleLogout = () => {
+    requestAnimationFrame(() => {
+      setTimeout(() => {
+        setIsAuthenticated(true);
+        setPhase('app');
+        setTransitioning(false);
+      }, 300);
+    });
+  }, [play]);
+
+  const handleLogout = useCallback(() => {
     setIsAuthenticated(false);
     setPhase('auth');
     play('click');
-  };
+  }, [play]);
 
-  const onSound = (key: 'click' | 'hover') => {
-    play(key, key === 'hover' ? 0.3 : 0.5);
-  };
+  const onSound = useCallback(
+    (key: 'click' | 'hover') => {
+      play(key, key === 'hover' ? 0.3 : 0.5);
+    },
+    [play]
+  );
 
-  // Preload phase
   if (phase === 'preload') {
     return <PreloadScreen onReady={() => setPhase('splash')} />;
   }
 
-  // Splash phase
   if (phase === 'splash') {
-    return <SplashScreen onComplete={() => setPhase(isAuthenticated ? 'app' : 'auth')} />;
+    return (
+      <SplashScreen
+        onComplete={() => setPhase(isAuthenticated ? 'app' : 'auth')}
+      />
+    );
   }
 
-  // Authenticated app
   if (phase === 'app' && isAuthenticated) {
     return (
       <>
@@ -59,11 +73,10 @@ export const AetherNetApp = () => {
     );
   }
 
-  // Auth phase
   return (
     <>
       <SVCursor />
-      <div className="sv-app">
+      <div className={`sv-app ${transitioning ? 'sv-app-transitioning' : ''}`}>
         <div className="sv-video-bg">
           <video autoPlay muted loop playsInline>
             <source src={VIDEO_BG} type="video/mp4" />
@@ -75,8 +88,14 @@ export const AetherNetApp = () => {
 
         <div className="sv-grid-overlay">
           <div className="sv-grid-line sv-grid-v" style={{ left: '5%' }} />
-          <div className="sv-grid-line sv-grid-v" style={{ left: '33.333%' }} />
-          <div className="sv-grid-line sv-grid-v" style={{ left: '66.666%' }} />
+          <div
+            className="sv-grid-line sv-grid-v"
+            style={{ left: '33.333%' }}
+          />
+          <div
+            className="sv-grid-line sv-grid-v"
+            style={{ left: '66.666%' }}
+          />
           <div className="sv-grid-line sv-grid-v" style={{ right: '5%' }} />
           <div className="sv-grid-line sv-grid-h" style={{ top: '15%' }} />
           <div className="sv-grid-line sv-grid-h" style={{ top: '50%' }} />
@@ -90,7 +109,9 @@ export const AetherNetApp = () => {
             <span className="sv-logo-ghost sv-logo-ghost-1">AETHERNET</span>
             <h1 className="sv-logo">
               {'AETHERNET'.split('').map((char, i) => (
-                <span key={i} className="sv-logo-char">{char}</span>
+                <span key={i} className="sv-logo-char">
+                  {char}
+                </span>
               ))}
             </h1>
             <span className="sv-logo-ghost sv-logo-ghost-2">AETHERNET</span>
@@ -113,7 +134,9 @@ export const AetherNetApp = () => {
             <span className="sv-status-dot" />
             <span className="sv-status-text">SYSTEM ONLINE</span>
           </div>
-          <p className="sv-footer-tagline">ONE FORCE BEHIND TOMORROW'S SYSTEMS</p>
+          <p className="sv-footer-tagline">
+            ONE FORCE BEHIND TOMORROW'S SYSTEMS
+          </p>
         </footer>
       </div>
     </>

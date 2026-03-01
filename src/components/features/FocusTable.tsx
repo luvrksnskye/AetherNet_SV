@@ -34,16 +34,14 @@ export const FocusTable: React.FC<Props> = ({ onSound }) => {
   const dragOverItem = useRef<{ colId: string; nodeIdx: number } | null>(null);
 
   useEffect(() => {
-    (async () => {
-      const saved = await storage.get<FocusBoard[]>(STORAGE_KEY);
-      if (saved?.length) { setBoards(saved); setActiveBoard(saved[0].id); }
-    })();
-  }, [storage]);
+    const saved = storage.get<FocusBoard[]>(STORAGE_KEY);
+    if (saved?.length) { setBoards(saved); setActiveBoard(saved[0].id); }
+  }, []);
 
-  const save = useCallback(async (next: FocusBoard[]) => {
+  const save = useCallback((next: FocusBoard[]) => {
     setBoards(next);
-    await storage.set(STORAGE_KEY, next);
-  }, [storage]);
+    storage.set(STORAGE_KEY, next);
+  }, []);
 
   const board = boards.find((b) => b.id === activeBoard) || null;
 
@@ -151,7 +149,6 @@ export const FocusTable: React.FC<Props> = ({ onSound }) => {
         <p className="sv-section-subtitle">ORGANIZA TAREAS EN NODOS VISUALES</p>
       </div>
 
-      {/* Board selector */}
       <div className="sv-focus-tabs">
         {boards.map((b) => (
           <button key={b.id} className={`sv-focus-tab ${activeBoard === b.id ? 'active' : ''}`} onClick={() => { setActiveBoard(b.id); onSound('click'); }} onMouseEnter={() => onSound('hover')}>
@@ -165,16 +162,14 @@ export const FocusTable: React.FC<Props> = ({ onSound }) => {
         </div>
       </div>
 
-      {/* Board content */}
       {board && (
         <div className="sv-focus-board">
           {board.columns.map((col) => (
-            <div key={col.id} className="sv-focus-column" onDragOver={(e) => { e.preventDefault(); }} onDrop={() => { if (dragOverItem.current?.colId !== col.id) { dragOverItem.current = { colId: col.id, nodeIdx: col.nodes.length }; } handleDragEnd(); }}>
+            <div key={col.id} className="sv-focus-column" onDragOver={(e) => e.preventDefault()} onDrop={() => { if (!dragOverItem.current || dragOverItem.current.colId !== col.id) { dragOverItem.current = { colId: col.id, nodeIdx: col.nodes.length }; } handleDragEnd(); }}>
               <div className="sv-focus-col-header">
                 <span className="sv-focus-col-title">{col.title}</span>
                 <span className="sv-focus-col-count">{col.nodes.length}</span>
               </div>
-
               <div className="sv-focus-col-nodes">
                 {col.nodes.map((node, idx) => (
                   <div key={node.id} className={`sv-focus-node sv-focus-node-${node.status}`} draggable onDragStart={() => handleDragStart(col.id, idx)} onDragEnter={() => handleDragEnter(col.id, idx)} onDragEnd={handleDragEnd} onDragOver={(e) => e.preventDefault()}>
@@ -189,7 +184,6 @@ export const FocusTable: React.FC<Props> = ({ onSound }) => {
                   </div>
                 ))}
               </div>
-
               <div className="sv-focus-col-add">
                 {newNodeCol === col.id ? (
                   <div className="sv-focus-add-form">
@@ -205,8 +199,6 @@ export const FocusTable: React.FC<Props> = ({ onSound }) => {
               </div>
             </div>
           ))}
-
-          {/* Add column */}
           <div className="sv-focus-column sv-focus-add-col">
             <input className="sv-input" type="text" placeholder="NUEVA COLUMNA..." value={newColTitle} onChange={(e) => setNewColTitle(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && addColumn()} />
             <button className="sv-btn" onClick={addColumn} disabled={!newColTitle.trim()} onMouseEnter={() => onSound('hover')}>+ COLUMNA</button>
