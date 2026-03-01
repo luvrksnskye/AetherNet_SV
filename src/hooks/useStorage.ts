@@ -1,34 +1,51 @@
-import { useCallback } from 'react';
+import { useCallback } from "react";
 
 export const useStorage = () => {
-  const get = useCallback(async <T = string>(key: string): Promise<T | null> => {
+  const get = useCallback(<T = string>(key: string): T | null => {
     try {
-      const result = await (window as any).storage.get(key);
-      if (!result) return null;
-      try { return JSON.parse(result.value) as T; } catch { return result.value as T; }
-    } catch { return null; }
+      const value = localStorage.getItem(key);
+      if (!value) return null;
+
+      try {
+        return JSON.parse(value) as T;
+      } catch {
+        return value as T;
+      }
+    } catch {
+      return null;
+    }
   }, []);
 
-  const set = useCallback(async <T>(key: string, value: T): Promise<boolean> => {
+  const set = useCallback(<T>(key: string, value: T): boolean => {
     try {
-      const serialized = typeof value === 'string' ? value : JSON.stringify(value);
-      const result = await (window as any).storage.set(key, serialized);
-      return !!result;
-    } catch { return false; }
+      const serialized =
+        typeof value === "string" ? value : JSON.stringify(value);
+
+      localStorage.setItem(key, serialized);
+      return true;
+    } catch {
+      return false;
+    }
   }, []);
 
-  const remove = useCallback(async (key: string): Promise<boolean> => {
+  const remove = useCallback((key: string): boolean => {
     try {
-      const result = await (window as any).storage.delete(key);
-      return !!result;
-    } catch { return false; }
+      localStorage.removeItem(key);
+      return true;
+    } catch {
+      return false;
+    }
   }, []);
 
-  const list = useCallback(async (prefix?: string): Promise<string[]> => {
+  const list = useCallback((prefix?: string): string[] => {
     try {
-      const result = await (window as any).storage.list(prefix);
-      return result?.keys || [];
-    } catch { return []; }
+      const keys = Object.keys(localStorage);
+      if (!prefix) return keys;
+
+      return keys.filter((k) => k.startsWith(prefix));
+    } catch {
+      return [];
+    }
   }, []);
 
   return { get, set, remove, list };
