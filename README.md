@@ -1,4 +1,2 @@
 
 # AetherNet — Starvortex System
-
-```
