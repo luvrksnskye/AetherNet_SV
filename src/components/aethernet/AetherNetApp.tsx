@@ -7,8 +7,7 @@ import { LoginForm } from '../features/LoginForm';
 import { useSVSounds } from '../../hooks/useSVSounds';
 import '../../styles/aethernet.css';
 
-const VIDEO_BG =
-  'https://dl.dropbox.com/scl/fi/qxh4lv0qcydnw9str6gju/bg-alt.mp4?rlkey=caqgw260cqamexollkco4wu3p&st=we2x7r1a&dl=0';
+const VIDEO_BG = "/videos/bg-alt.mp4";
 
 type AppPhase = 'preload' | 'splash' | 'auth' | 'app';
 

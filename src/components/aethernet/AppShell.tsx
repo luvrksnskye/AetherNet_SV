@@ -10,8 +10,7 @@ import { HexGrid } from '../features/HexGrid';
 import { MusicPlayer } from '../features/MusicPlayer';
 import type { DashboardView } from '../../types';
 
-const VIDEO_BG =
-  'https://dl.dropbox.com/scl/fi/qxh4lv0qcydnw9str6gju/bg-alt.mp4?rlkey=caqgw260cqamexollkco4wu3p&st=we2x7r1a&dl=0';
+const VIDEO_BG = "/videos/bg-alt.mp4";
 
 interface AppShellProps {
   onSound: (key: 'click' | 'hover') => void;
@@ -68,17 +67,16 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
   return (
     <div className="sv-shell">
       <div className="sv-video-bg">
-
-          <video
+<video
   autoPlay
   muted
   loop
   playsInline
-  preload="none"
-  style={{ pointerEvents: "none" }}
+  preload="metadata"
+  className="sv-video-element"
 >
-          <source src={VIDEO_BG} type="video/mp4" />
-        </video>
+  <source src={VIDEO_BG} type="video/mp4" />
+</video>
         <div className="sv-video-overlay" />
       </div>
 
