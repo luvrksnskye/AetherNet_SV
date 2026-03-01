@@ -68,15 +68,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
   return (
     <div className="sv-shell">
       <div className="sv-video-bg">
-
-          <video
-  autoPlay
-  muted
-  loop
-  playsInline
-  preload="none"
-  style={{ pointerEvents: "none" }}
->
+        <video autoPlay muted loop playsInline>
           <source src={VIDEO_BG} type="video/mp4" />
         </video>
         <div className="sv-video-overlay" />
