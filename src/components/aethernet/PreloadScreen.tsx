@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from "react";
 
 interface AssetStatus {
   loaded: number;
@@ -7,7 +7,8 @@ interface AssetStatus {
   errors: string[];
 }
 
-const VIDEO_BG = 'https://dl.dropbox.com/scl/fi/qxh4lv0qcydnw9str6gju/bg-alt.mp4?rlkey=caqgw260cqamexollkco4wu3p&st=we2x7r1a&dl=0';
+const VIDEO_BG =
+  "https://dl.dropbox.com/scl/fi/qxh4lv0qcydnw9str6gju/bg-alt.mp4?rlkey=caqgw260cqamexollkco4wu3p&st=we2x7r1a&dl=0";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -20,8 +21,8 @@ const SFX_ASSETS = [
 ];
 
 const FONT_ASSETS = [
-  { family: 'SV-Tech', url: `${BASE}starvortex_assets/tech.ttf` },
-  { family: 'SV-Hexaframe', url: `${BASE}starvortex_assets/Hexaframe.woff` },
+  { family: "SV-Tech", url: `${BASE}starvortex_assets/tech.ttf` },
+  { family: "SV-Hexaframe", url: `${BASE}starvortex_assets/Hexaframe.woff` },
 ];
 
 const IMAGE_ASSETS = [
@@ -35,114 +36,166 @@ const SYMBOL_ASSETS = [
   `${BASE}starvortex_assets/exp_symbol_portal.webm`,
 ];
 
-const preloadAudio = (url: string): Promise<void> =>
-  new Promise((resolve, reject) => {
-    const audio = new Audio();
-    audio.preload = 'auto';
-    audio.oncanplaythrough = () => resolve();
-    audio.onerror = () => reject(new Error(`Audio: ${url}`));
-    audio.src = url;
-    setTimeout(resolve, 3000); // timeout fallback
-  });
+/* -------------------- HELPERS -------------------- */
 
-const preloadImage = (url: string): Promise<void> =>
-  new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => reject(new Error(`Image: ${url}`));
-    img.src = url;
-    setTimeout(resolve, 5000);
-  });
+const withTimeout = (promise: Promise<void>, ms: number) =>
+  Promise.race([
+    promise,
+    new Promise<void>((resolve) => setTimeout(resolve, ms)),
+  ]);
 
-const preloadFont = (family: string, url: string): Promise<void> =>
-  new Promise((resolve) => {
-    const font = new FontFace(family, `url(${url})`);
-    font.load().then((loaded) => {
-      document.fonts.add(loaded);
-      resolve();
-    }).catch(() => resolve()); // Non-blocking
-  });
+const preloadAudio = (url: string) =>
+  withTimeout(
+    new Promise<void>((resolve, reject) => {
+      const audio = new Audio();
+      audio.preload = "metadata"; // más ligero
+      audio.onloadeddata = () => resolve();
+      audio.onerror = () => reject();
+      audio.src = url;
+    }),
+    4000
+  );
 
-const preloadVideo = (url: string): Promise<void> =>
-  new Promise((resolve) => {
-    const video = document.createElement('video');
-    video.preload = 'auto';
-    video.muted = true;
-    video.oncanplaythrough = () => resolve();
-    video.onerror = () => resolve(); // Non-blocking
-    video.src = url;
-    setTimeout(resolve, 8000); // generous timeout for video
-  });
+const preloadImage = (url: string) =>
+  withTimeout(
+    new Promise<void>((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve();
+      img.onerror = () => reject();
+      img.src = url;
+    }),
+    5000
+  );
+
+const preloadFont = (family: string, url: string) =>
+  withTimeout(
+    new Promise<void>((resolve) => {
+      const font = new FontFace(family, `url(${url})`);
+      font.load().then((loaded) => {
+        document.fonts.add(loaded);
+        resolve();
+      }).catch(resolve);
+    }),
+    4000
+  );
+
+const preloadVideo = (url: string) =>
+  withTimeout(
+    new Promise<void>((resolve) => {
+      const video = document.createElement("video");
+      video.preload = "metadata"; // NO usar auto
+      video.muted = true;
+      video.onloadeddata = () => resolve();
+      video.onerror = () => resolve();
+      video.src = url;
+    }),
+    6000
+  );
+
+/* -------------------- COMPONENT -------------------- */
 
 interface PreloadScreenProps {
   onReady: () => void;
-  skipDelay?: number;
+  minimumDuration?: number;
 }
 
-export const PreloadScreen: React.FC<PreloadScreenProps> = ({ onReady, skipDelay = 500 }) => {
-  const [status, setStatus] = useState<AssetStatus>({ loaded: 0, total: 0, ready: false, errors: [] });
-  const [canSkip, setCanSkip] = useState(false);
+export const PreloadScreen: React.FC<PreloadScreenProps> = ({
+  onReady,
+  minimumDuration = 1200,
+}) => {
+  const [status, setStatus] = useState<AssetStatus>({
+    loaded: 0,
+    total: 0,
+    ready: false,
+    errors: [],
+  });
 
-  useEffect(() => {
-    const timer = setTimeout(() => setCanSkip(true), skipDelay);
-    return () => clearTimeout(timer);
-  }, [skipDelay]);
+  const started = useRef(false);
 
   const runPreload = useCallback(async () => {
     const tasks: { name: string; fn: () => Promise<void> }[] = [];
 
-    // Fonts first (critical for UI)
-    FONT_ASSETS.forEach((f) => tasks.push({ name: f.family, fn: () => preloadFont(f.family, f.url) }));
+    FONT_ASSETS.forEach((f) =>
+      tasks.push({ name: f.family, fn: () => preloadFont(f.family, f.url) })
+    );
 
-    // Images
-    IMAGE_ASSETS.forEach((url) => tasks.push({ name: url, fn: () => preloadImage(url) }));
+    IMAGE_ASSETS.forEach((url) =>
+      tasks.push({ name: url, fn: () => preloadImage(url) })
+    );
 
-    // SFX
-    SFX_ASSETS.forEach((url) => tasks.push({ name: url, fn: () => preloadAudio(url) }));
+    SFX_ASSETS.forEach((url) =>
+      tasks.push({ name: url, fn: () => preloadAudio(url) })
+    );
 
-    // Video background (last, largest)
-    tasks.push({ name: 'video-bg', fn: () => preloadVideo(VIDEO_BG) });
+    tasks.push({ name: "video-bg", fn: () => preloadVideo(VIDEO_BG) });
 
-    // Symbols (non-blocking, load in background)
-    SYMBOL_ASSETS.forEach((url) => tasks.push({ name: url, fn: () => preloadVideo(url) }));
+    SYMBOL_ASSETS.forEach((url) =>
+      tasks.push({ name: url, fn: () => preloadVideo(url) })
+    );
 
     setStatus((s) => ({ ...s, total: tasks.length }));
 
     const errors: string[] = [];
-    for (const task of tasks) {
-      try {
-        await task.fn();
-      } catch (e) {
-        errors.push(task.name);
-      }
-      setStatus((s) => ({ ...s, loaded: s.loaded + 1, errors }));
-    }
 
-    setStatus((s) => ({ ...s, ready: true, errors }));
+    await Promise.all(
+      tasks.map(async (task) => {
+        try {
+          await task.fn();
+        } catch {
+          errors.push(task.name);
+        }
+
+        setStatus((s) => ({
+          ...s,
+          loaded: s.loaded + 1,
+          errors,
+        }));
+      })
+    );
+
+    setStatus((s) => ({
+      ...s,
+      ready: true,
+      errors,
+    }));
   }, []);
 
   useEffect(() => {
+    if (started.current) return;
+    started.current = true;
     runPreload();
   }, [runPreload]);
 
   useEffect(() => {
-    if (status.ready && canSkip) {
-      const timer = setTimeout(onReady, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [status.ready, canSkip, onReady]);
+    if (!status.ready) return;
 
-  const pct = status.total > 0 ? Math.round((status.loaded / status.total) * 100) : 0;
+    const timer = setTimeout(() => {
+      onReady();
+    }, minimumDuration);
+
+    return () => clearTimeout(timer);
+  }, [status.ready, onReady, minimumDuration]);
+
+  const pct =
+    status.total > 0
+      ? Math.round((status.loaded / status.total) * 100)
+      : 0;
 
   return (
     <div className="sv-preload">
       <div className="sv-preload-inner">
         <div className="sv-preload-logo">AETHERNET</div>
         <div className="sv-preload-subtitle">CARGANDO SISTEMA</div>
+
         <div className="sv-preload-bar-track">
-          <div className="sv-preload-bar-fill" style={{ width: `${pct}%` }} />
+          <div
+            className="sv-preload-bar-fill"
+            style={{ width: `${pct}%` }}
+          />
         </div>
+
         <div className="sv-preload-pct">{pct}%</div>
+
         {status.loaded > 0 && status.total > 0 && (
           <div className="sv-preload-detail">
             {status.loaded}/{status.total} ASSETS
@@ -153,7 +206,14 @@ export const PreloadScreen: React.FC<PreloadScreenProps> = ({ onReady, skipDelay
   );
 };
 
+/* -------------------- HOOK -------------------- */
+
 export const usePreloader = () => {
   const [ready, setReady] = useState(false);
-  return { ready, PreloadScreen: (props: Omit<PreloadScreenProps, 'onReady'>) => <PreloadScreen {...props} onReady={() => setReady(true)} /> , setReady };
+
+  const Screen = (props: Omit<PreloadScreenProps, "onReady">) => (
+    <PreloadScreen {...props} onReady={() => setReady(true)} />
+  );
+
+  return { ready, PreloadScreen: Screen, setReady };
 };
