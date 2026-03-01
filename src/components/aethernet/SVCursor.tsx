@@ -2,7 +2,6 @@ import { useSVCursor } from '../../hooks/useSVCursor';
 
 export const SVCursor = () => {
   const cursorRef = useSVCursor();
-
   return (
     <div ref={cursorRef} className="sv-cursor">
       <div className="sv-cursor-inner">

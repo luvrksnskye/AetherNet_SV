@@ -1,9 +1,7 @@
 import { useRef, useCallback } from 'react';
 
 type SFXKey = 'scan' | 'click' | 'hint' | 'affirmation' | 'hover';
-
 const BASE = import.meta.env.BASE_URL;
-
 const SFX_MAP: Record<SFXKey, string> = {
   scan: `${BASE}sfx/scan-zoom.wav`,
   click: `${BASE}sfx/click.wav`,
@@ -27,11 +25,7 @@ export const useSVSounds = () => {
     try {
       if (!cache.current.has(key)) preload(key);
       const audio = cache.current.get(key);
-      if (audio) {
-        audio.volume = volume;
-        audio.currentTime = 0;
-        audio.play().catch(() => {});
-      }
+      if (audio) { audio.volume = volume; audio.currentTime = 0; audio.play().catch(() => {}); }
     } catch {}
   }, [preload]);
 

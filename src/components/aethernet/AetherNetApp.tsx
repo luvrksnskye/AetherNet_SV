@@ -1,19 +1,19 @@
 import { useState, useEffect } from 'react';
+import { PreloadScreen } from './PreloadScreen';
 import { SplashScreen } from './SplashScreen';
 import { SVCursor } from './SVCursor';
+import { AppShell } from './AppShell';
 import { LoginForm } from '../features/LoginForm';
-import { RegisterForm } from '../features/RegisterForm';
-import { Dashboard } from '../features/Dashboard';
 import { useSVSounds } from '../../hooks/useSVSounds';
-import type { AuthMode } from '../../types/auth';
 import '../../styles/aethernet.css';
 
 const VIDEO_BG =
   'https://dl.dropbox.com/scl/fi/qxh4lv0qcydnw9str6gju/bg-alt.mp4?rlkey=caqgw260cqamexollkco4wu3p&st=we2x7r1a&dl=0';
 
+type AppPhase = 'preload' | 'splash' | 'auth' | 'app';
+
 export const AetherNetApp = () => {
-  const [showSplash, setShowSplash] = useState(true);
-  const [authMode, setAuthMode] = useState<AuthMode>('login');
+  const [phase, setPhase] = useState<AppPhase>('preload');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { play, preload } = useSVSounds();
 
@@ -25,17 +25,13 @@ export const AetherNetApp = () => {
 
   const handleLoginSuccess = () => {
     setIsAuthenticated(true);
+    setPhase('app');
     play('affirmation');
   };
 
   const handleLogout = () => {
     setIsAuthenticated(false);
-    setAuthMode('login');
-    play('click');
-  };
-
-  const handleModeSwitch = (mode: AuthMode) => {
-    setAuthMode(mode);
+    setPhase('auth');
     play('click');
   };
 
@@ -43,31 +39,30 @@ export const AetherNetApp = () => {
     play(key, key === 'hover' ? 0.3 : 0.5);
   };
 
-  if (showSplash) {
-    return <SplashScreen onComplete={() => setShowSplash(false)} />;
+  // Preload phase
+  if (phase === 'preload') {
+    return <PreloadScreen onReady={() => setPhase('splash')} />;
   }
 
-  if (isAuthenticated) {
+  // Splash phase
+  if (phase === 'splash') {
+    return <SplashScreen onComplete={() => setPhase(isAuthenticated ? 'app' : 'auth')} />;
+  }
+
+  // Authenticated app
+  if (phase === 'app' && isAuthenticated) {
     return (
-      <div className="sv-authenticated">
+      <>
         <SVCursor />
-        <div className="sv-video-bg">
-          <video autoPlay muted loop playsInline>
-            <source src={VIDEO_BG} type="video/mp4" />
-          </video>
-          <div className="sv-video-overlay" />
-        </div>
-        <div className="sv-pattern-bg" />
-        <div className="sv-scanline" />
-        <Dashboard onSound={onSound} onLogout={handleLogout} />
-      </div>
+        <AppShell onSound={onSound} onLogout={handleLogout} />
+      </>
     );
   }
 
+  // Auth phase
   return (
     <>
       <SVCursor />
-
       <div className="sv-app">
         <div className="sv-video-bg">
           <video autoPlay muted loop playsInline>
@@ -109,29 +104,7 @@ export const AetherNetApp = () => {
             <div className="sv-corner sv-corner-tr" />
             <div className="sv-corner sv-corner-bl" />
             <div className="sv-corner sv-corner-br" />
-
-            <div className="sv-mode-switch">
-              <button
-                className={`sv-mode-btn ${authMode === 'login' ? 'active' : ''}`}
-                onClick={() => handleModeSwitch('login')}
-                onMouseEnter={() => play('hover', 0.3)}
-              >
-                ACCESS
-              </button>
-              <button
-                className={`sv-mode-btn ${authMode === 'register' ? 'active' : ''}`}
-                onClick={() => handleModeSwitch('register')}
-                onMouseEnter={() => play('hover', 0.3)}
-              >
-                REGISTER
-              </button>
-            </div>
-
-            {authMode === 'login' ? (
-              <LoginForm setAuthMode={setAuthMode} onLoginSuccess={handleLoginSuccess} onSound={onSound} />
-            ) : (
-              <RegisterForm setAuthMode={setAuthMode} onLoginSuccess={handleLoginSuccess} onSound={onSound} />
-            )}
+            <LoginForm onLoginSuccess={handleLoginSuccess} onSound={onSound} />
           </div>
         </main>
 
