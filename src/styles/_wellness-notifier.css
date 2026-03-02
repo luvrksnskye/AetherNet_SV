@@ -1,0 +1,262 @@
+/* =============================================================
+   _wellness-notifier.css
+   Global persistent wellness notification toast
+   Clip-path corners, transparent white panels, slide-in
+   ============================================================= */
+
+/* ---- Container ---- */
+
+.sv-wellness-notif {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 9000;
+  width: clamp(300px, 28vw, 400px);
+  font-family: 'SV-Tech', monospace;
+  pointer-events: auto;
+}
+
+/* ---- Entrance / Exit ---- */
+
+.sv-wellness-notif-enter {
+  animation: sv-notif-enter 0.55s var(--sv-ease-spring, ease) forwards;
+}
+
+.sv-wellness-notif-exit {
+  animation: sv-notif-exit 0.35s var(--sv-ease-smooth, ease) forwards;
+}
+
+@keyframes sv-notif-enter {
+  from {
+    opacity: 0;
+    transform: translateX(40px) scale(0.96);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+@keyframes sv-notif-exit {
+  from {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateX(40px) scale(0.96);
+  }
+}
+
+/* ---- Backdrop with clip-path corner ---- */
+
+.sv-wellness-notif-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: saturate(180%) blur(16px);
+  -webkit-backdrop-filter: saturate(180%) blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0% 100%
+  );
+}
+
+.sv-wellness-notif-backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.04);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 12px),
+    calc(100% - 12px) 100%,
+    0% 100%
+  );
+  border: 1px solid transparent;
+  mask:
+    linear-gradient(#0000 0% 100%),
+    linear-gradient(#fff 0% 100%);
+  mask-clip: padding-box, border-box;
+  mask-repeat: no-repeat;
+  mask-composite: intersect;
+}
+
+/* Corner marker */
+.sv-wellness-notif-corner {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 12px;
+  height: 12px;
+}
+
+.sv-wellness-notif-corner::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 1px;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  transform: rotate(135deg);
+  background: rgba(255, 255, 255, 0.35);
+}
+
+/* ---- Content ---- */
+
+.sv-wellness-notif-content {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 1rem 1rem 0.75rem;
+}
+
+/* ---- Icon ---- */
+
+.sv-wellness-notif-icon {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 5px),
+    calc(100% - 5px) 100%,
+    0% 100%
+  );
+  background: rgba(255, 255, 255, 0.04);
+  animation: sv-notif-icon-pulse 3s ease-in-out infinite;
+}
+
+@keyframes sv-notif-icon-pulse {
+  0%, 100% { box-shadow: 0 0 0 rgba(255, 255, 255, 0); }
+  50% { box-shadow: 0 0 12px rgba(255, 255, 255, 0.08); }
+}
+
+/* ---- Text ---- */
+
+.sv-wellness-notif-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.sv-wellness-notif-title {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sv-wellness-notif-desc {
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.5);
+  line-height: 1.5;
+}
+
+.sv-wellness-notif-meta {
+  font-size: 0.5rem;
+  letter-spacing: 0.15em;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+}
+
+/* ---- Action buttons ---- */
+
+.sv-wellness-notif-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.sv-wellness-notif-btn {
+  position: relative;
+  padding: 0.3rem 0.6rem;
+  font-family: 'SV-Tech', monospace;
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.7);
+  cursor: none;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 4px),
+    calc(100% - 4px) 100%,
+    0% 100%
+  );
+  transition:
+    background 0.25s var(--sv-ease-smooth, ease),
+    color 0.25s var(--sv-ease-smooth, ease),
+    border-color 0.25s var(--sv-ease-smooth, ease),
+    transform 0.2s var(--sv-ease-spring, ease);
+}
+
+.sv-wellness-notif-btn:hover {
+  transform: translateX(2px);
+}
+
+.sv-wellness-notif-btn-action:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.95);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.sv-wellness-notif-btn-dismiss {
+  border-color: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.sv-wellness-notif-btn-dismiss:hover {
+  color: rgba(255, 255, 255, 0.6);
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+/* ---- Bottom progress bar ---- */
+
+.sv-wellness-notif-progress {
+  position: relative;
+  height: 2px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+
+.sv-wellness-notif-progress-fill {
+  height: 100%;
+  background: rgba(255, 255, 255, 0.25);
+  transition: width 1s linear;
+  box-shadow: 0 0 6px rgba(255, 255, 255, 0.15);
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 768px) {
+  .sv-wellness-notif {
+    right: 0.75rem;
+    bottom: 5rem;
+    width: calc(100vw - 1.5rem);
+    max-width: 380px;
+  }
+}

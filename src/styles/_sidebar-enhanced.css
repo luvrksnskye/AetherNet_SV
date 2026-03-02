@@ -1,0 +1,293 @@
+
+
+/* ---- Override base sidebar item for new structure ---- */
+
+.sv-sidebar-item {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 1rem;
+  background: transparent;
+  border: none;
+  color: var(--sv-secondary);
+  font-family: 'SV-Tech', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.15em;
+  cursor: none;
+  text-align: left;
+  width: 100%;
+  overflow: hidden;
+  isolation: isolate;
+  transition:
+    color 0.3s var(--sv-ease-smooth, ease),
+    transform 0.25s var(--sv-ease-spring, ease);
+}
+
+/* ---- Clip-path backdrop (transparent white on hover) ---- */
+
+.sv-sidebar-item-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(255, 255, 255, 0);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 8px),
+    calc(100% - 8px) 100%,
+    0% 100%
+  );
+  transition:
+    background 0.3s var(--sv-ease-smooth, ease),
+    clip-path 0.3s var(--sv-ease-spring, ease);
+  pointer-events: none;
+}
+
+.sv-sidebar-item:hover .sv-sidebar-item-backdrop {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sv-sidebar-item.active .sv-sidebar-item-backdrop {
+  background: rgba(255, 255, 255, 0.08);
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 10px),
+    calc(100% - 10px) 100%,
+    0% 100%
+  );
+}
+
+/* ---- Active indicator (left edge animated line) ---- */
+
+.sv-sidebar-indicator {
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 0%;
+  background: rgba(255, 255, 255, 0.9);
+  transform: translateY(-50%);
+  transition:
+    height 0.35s var(--sv-ease-spring, ease),
+    box-shadow 0.35s var(--sv-ease-smooth, ease),
+    opacity 0.35s var(--sv-ease-smooth, ease);
+  opacity: 0;
+}
+
+.sv-sidebar-item:hover .sv-sidebar-indicator {
+  height: 40%;
+  opacity: 0.5;
+}
+
+.sv-sidebar-item.active .sv-sidebar-indicator {
+  height: 70%;
+  opacity: 1;
+  box-shadow:
+    0 0 8px rgba(255, 255, 255, 0.6),
+    0 0 20px rgba(255, 255, 255, 0.15);
+}
+
+/* ---- Corner cut on active items ---- */
+
+.sv-sidebar-item-corner {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.sv-sidebar-item-corner::after {
+  content: '';
+  position: absolute;
+  width: 200%;
+  height: 2px;
+  top: 50%;
+  left: 50%;
+  translate: -50% -50%;
+  transform: rotate(135deg);
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ---- Hover: translateX + color ---- */
+
+.sv-sidebar-item:hover {
+  color: var(--sv-primary);
+  transform: translateX(3px);
+  /* Remove old bg override */
+  background: transparent;
+  border-right: none;
+}
+
+.sv-sidebar-item.active {
+  color: var(--sv-primary);
+  text-shadow: 0 0 8px rgba(255, 255, 255, 0.3);
+  transform: translateX(0);
+  background: transparent;
+  border-right: none;
+}
+
+/* ---- Icon pulse on active ---- */
+
+.sv-sidebar-item.active .sv-sidebar-icon {
+  animation: sv-icon-pulse 3s ease-in-out infinite;
+}
+
+@keyframes sv-icon-pulse {
+  0%, 100% {
+    text-shadow: 0 0 4px rgba(255, 255, 255, 0.2);
+    opacity: 1;
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.6);
+    opacity: 0.85;
+  }
+}
+
+/* ---- Stagger entrance for nav items ---- */
+
+.sv-sidebar-item {
+  opacity: 0;
+  animation: sv-nav-stagger 0.5s var(--sv-ease-spring, ease) forwards;
+  animation-delay: calc(0.05s + var(--nav-index, 0) * 0.04s);
+}
+
+@keyframes sv-nav-stagger {
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ---- Sidebar border glow (right edge) ---- */
+
+.sv-sidebar::after {
+  content: '';
+  position: absolute;
+  top: 1rem;
+  right: -1px;
+  bottom: 1rem;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.15) 20%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.15) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  animation: sv-sidebar-glow 4s ease-in-out infinite;
+}
+
+@keyframes sv-sidebar-glow {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+/* ---- Toggle button enhancement ---- */
+
+.sv-sidebar-toggle {
+  position: relative;
+  overflow: hidden;
+  transition:
+    border-color 0.3s var(--sv-ease-smooth, ease),
+    color 0.3s var(--sv-ease-smooth, ease),
+    transform 0.2s var(--sv-ease-spring, ease);
+}
+
+.sv-sidebar-toggle:hover {
+  transform: scale(1.1);
+  border-color: rgba(255, 255, 255, 0.5);
+  color: var(--sv-primary);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.15);
+}
+
+.sv-sidebar-toggle:active {
+  transform: scale(0.9);
+}
+
+/* ---- Avatar glow ---- */
+
+.sv-sidebar-avatar {
+  position: relative;
+  transition:
+    border-color 0.3s var(--sv-ease-smooth, ease),
+    box-shadow 0.3s var(--sv-ease-smooth, ease);
+}
+
+.sv-sidebar-avatar::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border: 1px solid rgba(255, 255, 255, 0);
+  transition: border-color 0.3s ease;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0% 100%
+  );
+}
+
+.sv-sidebar-user:hover .sv-sidebar-avatar::after {
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* ---- Logout button clip-path ---- */
+
+.sv-sidebar-logout {
+  position: relative;
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    100% calc(100% - 6px),
+    calc(100% - 6px) 100%,
+    0% 100%
+  );
+  transition:
+    border-color 0.3s var(--sv-ease-smooth, ease),
+    color 0.3s var(--sv-ease-smooth, ease),
+    box-shadow 0.3s var(--sv-ease-smooth, ease),
+    background 0.3s var(--sv-ease-smooth, ease);
+}
+
+.sv-sidebar-logout:hover {
+  background: rgba(255, 68, 102, 0.08);
+}
+
+/* ---- Brand text shimmer ---- */
+
+.sv-sidebar-brand-text {
+  position: relative;
+  overflow: hidden;
+}
+
+.sv-sidebar-brand-text::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  animation: sv-brand-shimmer 6s ease-in-out infinite;
+}
+
+@keyframes sv-brand-shimmer {
+  0%, 70%, 100% { left: -100%; }
+  85% { left: 200%; }
+}

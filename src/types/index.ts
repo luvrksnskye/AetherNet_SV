@@ -71,24 +71,34 @@ export interface LogEntry {
   color?: TokenColor;
 }
 
-export type DashboardView = 'overview' | 'tokens' | 'roadmap' | 'logs' | 'notes' | 'settings' | 'tools' | 'focus' | 'lists' | 'hexgrid';
+export type DashboardView =
+  | 'overview'
+  | 'tokens'
+  | 'roadmap'
+  | 'logs'
+  | 'notes'
+  | 'settings'
+  | 'tools'
+  | 'focus'
+  | 'lists'
+  | 'hexgrid'
+  | 'library';
 
 export const AXIOM_CORE_PHASES: RoadmapPhase[] = [
   { id: 'ac-1', number: 1, title: 'Pre-algebra', domain: 'Base Algoritmica', tacticalValue: 'Calculos base sin titubeo. Fracciones, decimales, proporciones, porcentajes, negativos.', topics: ['Fracciones', 'Decimales', 'Proporciones', 'Porcentajes', 'Numeros negativos'], branch: 'axiom-core' },
   { id: 'ac-2', number: 2, title: 'Algebra 1', domain: 'Nucleo Logico', tacticalValue: 'Pensamiento algoritmico puro. Aislar la variable desconocida (x) es el equivalente mental de rastrear un bug.', topics: ['Ecuaciones lineales', 'Desigualdades', 'Funciones f(x)', 'Graficacion basica'], branch: 'axiom-core' },
   { id: 'ac-3', number: 3, title: 'Geometria', domain: 'Espacio y Forma', tacticalValue: 'Fundamento GameDev. Hitboxes, iluminacion, transformaciones 2D/3D.', topics: ['Angulos', 'Poligonos', 'Areas', 'Volumenes', 'Transformaciones cartesianas'], branch: 'axiom-core' },
-  { id: 'ac-4', number: 4, title: 'Algebra 2', domain: 'Expansion del Motor', tacticalValue: 'Logaritmos son el latido de la complejidad algoritmica. O(log N) depende de esta base.', topics: ['Ecuaciones cuadraticas', 'Polinomios complejos', 'Logaritmos', 'Numeros imaginarios'], branch: 'axiom-core' },
-  { id: 'ac-5', number: 5, title: 'Trigonometria', domain: 'Puente Grafico', tacticalValue: 'Evolucion de la logica espacial. Trayectorias, fisica, rotaciones de camara, movimiento direccional.', topics: ['Senos', 'Cosenos', 'Tangentes', 'Circulo unitario', 'Vectores'], branch: 'axiom-core' },
-  { id: 'ac-6', number: 6, title: 'Probabilidad y Estadistica', domain: 'Mente Analitica', tacticalValue: 'Escudo tactico para Ciberseguridad. Prediccion de patrones, analisis de datos masivos, prerrequisito para DP.', topics: ['Permutaciones', 'Combinaciones', 'Distribuciones', 'Probabilidad condicional'], branch: 'axiom-core' },
-  { id: 'ac-7', number: 7, title: 'Precalculo y Algebra Lineal', domain: 'FAANG Apex', tacticalValue: 'Matrices dictan procesamiento de imagenes, renderizado 3D, criptografia. Tier elite de CS.', topics: ['Matrices', 'Espacio vectorial', 'Limites', 'Transformaciones matriciales'], branch: 'axiom-core' },
-  { id: 'ac-8', number: 8, title: 'Calculo 1 y 2', domain: 'Motor Continuo', tacticalValue: 'Lenguaje de la Fisica. Motor de fisica en Godot, gravedad realista, Gradient Descent en ML.', topics: ['Limites y continuidad', 'Derivadas', 'Integrales', 'Series infinitas', 'Ecuaciones parametricas'], branch: 'axiom-core' },
-  { id: 'ac-9', number: 9, title: 'Calculo Multivariable', domain: 'Realidad 3D', tacticalValue: 'Fisica traducida a 3D. Renderizado avanzado, dinamica de fluidos, campos electromagneticos.', topics: ['Vectores en 3D', 'Derivadas parciales', 'Integrales multiples', 'Campos vectoriales'], branch: 'axiom-core' },
-  { id: 'ac-10', number: 10, title: 'Ecuaciones Diferenciales', domain: 'Leyes de la Naturaleza', tacticalValue: 'Nucleo de ingenieria pura. Modelado de sistemas dinamicos, circuitos, suspension mecanica.', topics: ['Ecuaciones de primer orden', 'Segundo orden', 'Transformadas de Laplace', 'Modelado matematico'], branch: 'axiom-core' },
-  { id: 'ac-11', number: 11, title: 'Algebra Lineal Avanzada', domain: 'Computacion Definitiva', tacticalValue: 'Tier elite. Eigenvalores, procesamiento de imagenes, criptografia avanzada, base de Quantum Computing e IA.', topics: ['Matrices y espacios vectoriales', 'Eigenvalores y eigenvectores', 'Transformaciones matriciales'], branch: 'axiom-core' },
+  { id: 'ac-4', number: 4, title: 'Algebra 2', domain: 'Expansion del Motor', tacticalValue: 'Logaritmos son el latido de la complejidad algoritmica. Polinomios y racionales son la base de todo modelado.', topics: ['Polinomios', 'Funciones racionales', 'Logaritmos', 'Exponenciales', 'Numeros complejos'], branch: 'axiom-core' },
+  { id: 'ac-5', number: 5, title: 'Trigonometria', domain: 'Motor Angular', tacticalValue: 'Rotaciones, ondas, audio, vision. Sin esto no hay 3D ni procesamiento de senales.', topics: ['Funciones trigonometricas', 'Identidades', 'Ley de senos/cosenos', 'Graficas', 'Aplicaciones'], branch: 'axiom-core' },
+  { id: 'ac-6', number: 6, title: 'Pre-calculo', domain: 'Puente Avanzado', tacticalValue: 'Limites intuitivos, secuencias y series. La entrada formal al analisis.', topics: ['Limites', 'Secuencias', 'Series', 'Funciones avanzadas', 'Coordenadas polares'], branch: 'axiom-core' },
+  { id: 'ac-7', number: 7, title: 'Calculo 1', domain: 'Motor de Cambio', tacticalValue: 'Derivadas e integrales. Optimizacion, tasas de cambio, machine learning.', topics: ['Derivadas', 'Reglas de derivacion', 'Integrales', 'Teorema fundamental', 'Aplicaciones'], branch: 'axiom-core' },
+  { id: 'ac-8', number: 8, title: 'Calculo 2', domain: 'Motor Integral', tacticalValue: 'Tecnicas de integracion, series de Taylor. Aproximacion y modelado avanzado.', topics: ['Tecnicas de integracion', 'Series de Taylor', 'Ecuaciones parametricas', 'Series infinitas'], branch: 'axiom-core' },
+  { id: 'ac-9', number: 9, title: 'Algebra Lineal', domain: 'Espacio Vectorial', tacticalValue: 'Graphics, ML, compresion, criptografia. Todo pasa por matrices y vectores.', topics: ['Vectores', 'Matrices', 'Transformaciones lineales', 'Eigenvalores', 'Espacios vectoriales'], branch: 'axiom-core' },
+  { id: 'ac-10', number: 10, title: 'Probabilidad y Estadistica', domain: 'Motor Estocastico', tacticalValue: 'A/B testing, ML, data science. La base de toda decision basada en datos.', topics: ['Probabilidad', 'Distribuciones', 'Inferencia', 'Regresion', 'Pruebas de hipotesis'], branch: 'axiom-core' },
 ];
 
 export const COMPUTATIONAL_PHASES: RoadmapPhase[] = [
-  { id: 'cb-1', number: 1, title: 'MIT 6.042J', domain: 'Fundamento', tacticalValue: 'Puente entre matematicas abstractas y pensamiento algoritmico. Probar por que un algoritmo funciona antes de escribir codigo.', topics: ['Pruebas', 'Estructuras discretas', 'Teoria de grafos', 'Probabilidad'], branch: 'computational' },
-  { id: 'cb-2', number: 2, title: 'MIT 6.006', domain: 'Motor Central', tacticalValue: 'Arsenal primario para LeetCode. Estructuras de datos y patrones logicos para optimizar complejidad O(N).', topics: ['Sorting', 'Arboles', 'Hashing', 'DP introductorio'], branch: 'computational' },
-  { id: 'cb-3', number: 3, title: 'MIT 6.046J', domain: 'FAANG Apex', tacticalValue: 'Diseno de sistemas a nivel elite. Techo teorico para arquitecturas distribuidas masivas.', topics: ['DP avanzado', 'Algoritmos greedy', 'Network flow', 'NP-hardness'], branch: 'computational' },
+  { id: 'comp-1', number: 1, title: 'MIT 6.042J', domain: 'Matematicas Discretas', tacticalValue: 'Logica, pruebas, teoria de grafos, combinatoria. La base formal de CS.', topics: ['Logica proposicional', 'Pruebas', 'Induccion', 'Teoria de grafos', 'Combinatoria', 'Probabilidad discreta'], branch: 'computational' },
+  { id: 'comp-2', number: 2, title: 'MIT 6.006', domain: 'Algoritmos I', tacticalValue: 'Sorting, searching, grafos, DP. El core de las entrevistas tecnicas.', topics: ['Complejidad', 'Sorting', 'Hashing', 'Grafos BFS/DFS', 'Shortest paths', 'Dynamic programming'], branch: 'computational' },
+  { id: 'comp-3', number: 3, title: 'MIT 6.046J', domain: 'Algoritmos II', tacticalValue: 'Divide and conquer, greedy, NP-completeness. Nivel avanzado de resolucion.', topics: ['Divide and conquer', 'Greedy algorithms', 'Network flow', 'NP-completeness', 'Approximation', 'Randomized algorithms'], branch: 'computational' },
 ];

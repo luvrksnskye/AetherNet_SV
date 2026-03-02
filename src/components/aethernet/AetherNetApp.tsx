@@ -24,6 +24,14 @@ export const AetherNetApp = () => {
     preload('scan');
     preload('affirmation');
     preload('hint');
+    preload('nock');
+    preload('takeout');
+    preload('click2');
+    preload('click3');
+    preload('click4');
+    preload('click5');
+    preload('click6');
+    preload('scrollwheel');
   }, [preload]);
 
   const handleLoginSuccess = useCallback(() => {
@@ -68,7 +76,11 @@ export const AetherNetApp = () => {
     return (
       <>
         <SVCursor />
-        <AppShell onSound={onSound} onLogout={handleLogout} />
+        <AppShell
+  onSound={onSound}
+  onSoundFx={play}
+  onLogout={handleLogout}
+/>
       </>
     );
   }

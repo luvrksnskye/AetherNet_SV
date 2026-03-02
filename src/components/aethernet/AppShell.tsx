@@ -8,6 +8,8 @@ import { FocusTable } from '../features/FocusTable';
 import { DragLists } from '../features/DragLists';
 import { HexGrid } from '../features/HexGrid';
 import { MusicPlayer } from '../features/MusicPlayer';
+import { LibraryDashboard } from '../features/LibraryDashboard';
+import { WellnessNotifier } from '../features/WellnessNotifier';
 import type { DashboardView } from '../../types';
 import type { SFXKey } from '../../hooks/useSVSounds';
 
@@ -29,6 +31,7 @@ const NAV_ITEMS: { id: DashboardView; label: string; icon: string }[] = [
   { id: 'lists', label: 'LISTAS', icon: '\u2630' },
   { id: 'hexgrid', label: 'HEXAGRID', icon: '\u2B22' },
   { id: 'notes', label: 'BITACORA', icon: '\u270E' },
+  { id: 'library', label: 'BIBLIOTECA', icon: '\u2756' },
 ];
 
 /* SFX rotation for navigation clicks */
@@ -68,24 +71,19 @@ export const AppShell: React.FC<AppShellProps> = ({
     (v: DashboardView) => {
       if (v === view) return;
 
-      /* Play a rotating click variant */
       const sfx = NAV_CLICK_SOUNDS[navClickIdx.current % NAV_CLICK_SOUNDS.length];
       navClickIdx.current++;
       playFx(sfx, 0.4);
 
-      /* Start exit transition */
       setViewTransition('entering');
 
-      /* Scroll body to top */
       if (bodyRef.current) {
         bodyRef.current.scrollTo({ top: 0, behavior: 'smooth' });
       }
 
-      /* Swap view after a short delay to let exit anim play */
       requestAnimationFrame(() => {
         setTimeout(() => {
           setView(v);
-          /* Let entering anim begin */
           requestAnimationFrame(() => {
             setTimeout(() => setViewTransition('idle'), 50);
           });
@@ -111,6 +109,8 @@ export const AppShell: React.FC<AppShellProps> = ({
         return <DragLists onSound={onSound} />;
       case 'hexgrid':
         return <HexGrid onSound={onSound} onSoundFx={onSoundFx ? (k, v) => playFx(k, v) : undefined} />;
+      case 'library':
+        return <LibraryDashboard onSound={onSound} />;
       case 'overview':
       default:
         return (
@@ -160,17 +160,24 @@ export const AppShell: React.FC<AppShellProps> = ({
               <button
                 key={item.id}
                 className={`sv-sidebar-item ${view === item.id ? 'active' : ''}`}
-                style={
-                  { '--nav-index': i } as React.CSSProperties
-                }
+                style={{ '--nav-index': i } as React.CSSProperties}
                 onClick={() => navigate(item.id)}
                 onMouseEnter={() => playFx('hover', 0.12)}
                 title={item.label}
               >
+                {/* Active indicator line */}
+                <span className="sv-sidebar-indicator" />
+
+                {/* Clip-path backdrop for hover */}
+                <span className="sv-sidebar-item-backdrop" />
+
                 <span className="sv-sidebar-icon">{item.icon}</span>
                 {sidebarOpen && (
                   <span className="sv-sidebar-label">{item.label}</span>
                 )}
+
+                {/* Corner cut on active */}
+                {view === item.id && <span className="sv-sidebar-item-corner" />}
               </button>
             ))}
           </nav>
@@ -221,6 +228,9 @@ export const AppShell: React.FC<AppShellProps> = ({
           </div>
         </main>
       </div>
+
+      {/* Global wellness notifier - persists across all views */}
+      {shellReady && <WellnessNotifier onSound={onSound} />}
 
       {shellReady && <MusicPlayer onSound={onSound} />}
     </div>
