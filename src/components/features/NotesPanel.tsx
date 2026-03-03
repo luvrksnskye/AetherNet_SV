@@ -38,7 +38,6 @@ const CY = 250;
 function simulate(nodes: SimNode[]): SimNode[] {
   const next = nodes.map((n) => ({ ...n }));
 
-  // Repulsion
   for (let i = 0; i < next.length; i++) {
     for (let j = i + 1; j < next.length; j++) {
       const a = next[i];
@@ -54,7 +53,6 @@ function simulate(nodes: SimNode[]): SimNode[] {
     }
   }
 
-  // Center pull + damping
   for (const n of next) {
     n.vx += (CX - n.x) * 0.008;
     n.vy += (CY - n.y) * 0.008;
@@ -91,8 +89,8 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<'graph' | 'list'>('graph');
   const [showColorPicker, setShowColorPicker] = useState(false);
+  const [panelVisible, setPanelVisible] = useState(false);
 
-  // Force graph
   const [simNodes, setSimNodes] = useState<SimNode[]>([]);
   const rafRef = useRef<number>(0);
   const dragging = useRef<string | null>(null);
@@ -109,7 +107,6 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
     storage.set(STORAGE_KEY, next);
   }, []);
 
-  // Build sim nodes
   useEffect(() => {
     setSimNodes((prev) =>
       notes.map((note, i) => {
@@ -126,11 +123,10 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
           title: note.title,
           weight: Math.min(note.content.length / 20, 8) + 2,
         };
-      })
+      }),
     );
   }, [notes]);
 
-  // Tick
   useEffect(() => {
     if (simNodes.length === 0) return;
     let running = true;
@@ -143,7 +139,6 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
     return () => { running = false; cancelAnimationFrame(rafRef.current); };
   }, [simNodes.length]);
 
-  // Drag
   const onDragStart = (id: string, e: React.MouseEvent) => {
     e.preventDefault();
     dragging.current = id;
@@ -159,8 +154,8 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
       prev.map((n) =>
         n.id === dragging.current
           ? { ...n, fx: svgPt.x, fy: svgPt.y, x: svgPt.x, y: svgPt.y }
-          : n
-      )
+          : n,
+      ),
     );
   };
 
@@ -168,7 +163,7 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
     if (dragging.current) {
       const id = dragging.current;
       setSimNodes((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, fx: n.x, fy: n.y } : n))
+        prev.map((n) => (n.id === id ? { ...n, fx: n.x, fy: n.y } : n)),
       );
     }
     dragging.current = null;
@@ -176,11 +171,29 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
 
   const onDblClick = (id: string) => {
     setSimNodes((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, fx: null, fy: null } : n))
+      prev.map((n) => (n.id === id ? { ...n, fx: null, fy: null } : n)),
     );
   };
 
-  // CRUD
+  /* Panel management */
+  const openDetail = (id: string) => {
+    if (selectedNode === id) {
+      closeDetail();
+      return;
+    }
+    setSelectedNode(id);
+    setPanelVisible(true);
+    onSound('click');
+  };
+
+  const closeDetail = () => {
+    setPanelVisible(false);
+    setTimeout(() => {
+      setSelectedNode(null);
+      setShowColorPicker(false);
+    }, 300);
+  };
+
   const handleCreate = () => {
     if (!title.trim()) return;
     onSound('click');
@@ -198,7 +211,7 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
   const handleUpdate = (id: string) => {
     onSound('click');
     save(notes.map((n) =>
-      n.id === id ? { ...n, title: title.trim(), content: content.trim() } : n
+      n.id === id ? { ...n, title: title.trim(), content: content.trim() } : n,
     ));
     resetForm();
   };
@@ -207,7 +220,7 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
     onSound('click');
     save(notes.filter((n) => n.id !== id));
     if (editingId === id) resetForm();
-    if (selectedNode === id) setSelectedNode(null);
+    if (selectedNode === id) closeDetail();
   };
 
   const startEdit = (note: NoteEntry) => {
@@ -216,6 +229,7 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
     setTitle(note.title);
     setContent(note.content);
     setCreating(false);
+    closeDetail();
   };
 
   const resetForm = () => {
@@ -238,20 +252,18 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
 
   return (
     <div className="sv-notes-dash">
-      <div className="sv-section-header">
+      <div className="sv-section-header sv-anim-stagger-1">
         <h2 className="sv-section-title">BITACORA</h2>
         <p className="sv-section-subtitle">NOTAS Y REGISTRO DE OPERACIONES</p>
       </div>
 
-      {/* View toggle */}
-      <div className="sv-method-toggle">
+      <div className="sv-method-toggle sv-anim-stagger-2">
         <button className={`sv-method-btn ${viewMode === 'graph' ? 'active' : ''}`} onClick={() => { setViewMode('graph'); onSound('click'); }} onMouseEnter={() => onSound('hover')}>NODOS</button>
         <button className={`sv-method-btn ${viewMode === 'list' ? 'active' : ''}`} onClick={() => { setViewMode('list'); onSound('click'); }} onMouseEnter={() => onSound('hover')}>LISTA</button>
       </div>
 
-      {/* Create button */}
       {!creating && !editingId && (
-        <button className="sv-btn" onClick={() => { setCreating(true); onSound('click'); }} onMouseEnter={() => onSound('hover')}>+ NUEVA NOTA</button>
+        <button className="sv-btn sv-anim-stagger-2" onClick={() => { setCreating(true); onSound('click'); }} onMouseEnter={() => onSound('hover')}>+ NUEVA NOTA</button>
       )}
 
       {/* Form */}
@@ -292,9 +304,9 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
         </div>
       )}
 
-      {/* GRAPH VIEW */}
+      {/* GRAPH VIEW with overlay */}
       {viewMode === 'graph' && (
-        <div className="sv-graph-wrap">
+        <div className="sv-graph-wrap sv-anim-stagger-3">
           <svg
             ref={svgRef}
             className="sv-graph-svg"
@@ -303,7 +315,6 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
             onMouseUp={onDragEnd}
             onMouseLeave={onDragEnd}
           >
-            {/* Edges: arc links between sequential nodes */}
             <g id="edges">
               {simNodes.map((node, i) => {
                 if (i === 0) return null;
@@ -324,7 +335,6 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
               })}
             </g>
 
-            {/* Nodes */}
             <g id="nodes">
               {simNodes.map((node) => {
                 const r = 5 + node.weight * 2;
@@ -332,7 +342,6 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
                 const isSelected = selectedNode === node.id;
                 return (
                   <g key={node.id}>
-                    {/* Glow for selected */}
                     {isSelected && (
                       <circle
                         cx={node.x}
@@ -355,7 +364,7 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
                       style={{ cursor: dragging.current === node.id ? 'grabbing' : 'grab' }}
                       onMouseDown={(e) => onDragStart(node.id, e)}
                       onDoubleClick={() => onDblClick(node.id)}
-                      onClick={() => { setSelectedNode(selectedNode === node.id ? null : node.id); onSound('click'); }}
+                      onClick={() => openDetail(node.id)}
                     />
                     <text
                       x={node.x}
@@ -379,44 +388,50 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
             <div className="sv-graph-empty">CREA NOTAS PARA VER NODOS EN EL GRAFO</div>
           )}
 
-          {/* Selected node detail */}
+          {/* Overlay detail panel */}
           {selectedNote && (
-            <div className="sv-graph-detail">
-              <div className="sv-corner sv-corner-tl" />
-              <div className="sv-corner sv-corner-tr" />
-              <div className="sv-corner sv-corner-bl" />
-              <div className="sv-corner sv-corner-br" />
-              <div className="sv-hex-detail-header">
-                <div>
-                  <h3 className="sv-detail-title" style={{ color: (selectedNote as any).color || '#4488ff' }}>{selectedNote.title}</h3>
-                  <span className="sv-detail-cat">{formatDate(selectedNote.date)}</span>
-                </div>
-                <button className="sv-detail-close" onClick={() => setSelectedNode(null)} onMouseEnter={() => onSound('hover')}>&times;</button>
-              </div>
-              <p className="sv-detail-desc">{selectedNote.content || 'SIN CONTENIDO'}</p>
-
-              {/* Color picker inline */}
-              {showColorPicker && (
-                <div className="sv-node-color-picker">
-                  <div className="sv-field-label"><span>COLOR DEL NODO</span></div>
-                  <div className="sv-node-color-row">
-                    {NODE_COLORS.map((c) => (
-                      <button
-                        key={c}
-                        className={`sv-node-color-btn ${(selectedNote as any).color === c ? 'sv-node-color-active' : ''}`}
-                        style={{ background: c }}
-                        onClick={() => changeNodeColor(selectedNote.id, c)}
-                        onMouseEnter={() => onSound('hover')}
-                      />
-                    ))}
+            <div
+              className={`sv-notes-overlay ${panelVisible ? 'sv-notes-overlay-visible' : 'sv-notes-overlay-hidden'}`}
+              onClick={(e) => {
+                if (e.target === e.currentTarget) closeDetail();
+              }}
+            >
+              <div className="sv-notes-detail-panel">
+                <div className="sv-corner sv-corner-tl" />
+                <div className="sv-corner sv-corner-tr" />
+                <div className="sv-corner sv-corner-bl" />
+                <div className="sv-corner sv-corner-br" />
+                <div className="sv-hex-detail-header">
+                  <div>
+                    <h3 className="sv-detail-title" style={{ color: (selectedNote as any).color || '#4488ff' }}>{selectedNote.title}</h3>
+                    <span className="sv-detail-cat">{formatDate(selectedNote.date)}</span>
                   </div>
+                  <button className="sv-detail-close" onClick={closeDetail} onMouseEnter={() => onSound('hover')}>&times;</button>
                 </div>
-              )}
+                <p className="sv-detail-desc">{selectedNote.content || 'SIN CONTENIDO'}</p>
 
-              <div className="sv-burn-actions" style={{ marginTop: '0.75rem' }}>
-                <button className="sv-btn" onClick={() => { setShowColorPicker(!showColorPicker); onSound('click'); }} onMouseEnter={() => onSound('hover')}>COLOR</button>
-                <button className="sv-btn" onClick={() => startEdit(selectedNote)} onMouseEnter={() => onSound('hover')}>EDITAR</button>
-                <button className="sv-btn sv-btn-danger" onClick={() => handleDelete(selectedNote.id)} onMouseEnter={() => onSound('hover')}>ELIMINAR</button>
+                {showColorPicker && (
+                  <div className="sv-node-color-picker">
+                    <div className="sv-field-label"><span>COLOR DEL NODO</span></div>
+                    <div className="sv-node-color-row">
+                      {NODE_COLORS.map((c) => (
+                        <button
+                          key={c}
+                          className={`sv-node-color-btn ${(selectedNote as any).color === c ? 'sv-node-color-active' : ''}`}
+                          style={{ background: c }}
+                          onClick={() => changeNodeColor(selectedNote.id, c)}
+                          onMouseEnter={() => onSound('hover')}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="sv-burn-actions" style={{ marginTop: '0.75rem' }}>
+                  <button className="sv-btn" onClick={() => { setShowColorPicker(!showColorPicker); onSound('click'); }} onMouseEnter={() => onSound('hover')}>COLOR</button>
+                  <button className="sv-btn" onClick={() => startEdit(selectedNote)} onMouseEnter={() => onSound('hover')}>EDITAR</button>
+                  <button className="sv-btn sv-btn-danger" onClick={() => handleDelete(selectedNote.id)} onMouseEnter={() => onSound('hover')}>ELIMINAR</button>
+                </div>
               </div>
             </div>
           )}
@@ -425,7 +440,7 @@ export const NotesPanel: React.FC<NotesPanelProps> = ({ onSound }) => {
 
       {/* LIST VIEW */}
       {viewMode === 'list' && (
-        <div className="sv-notes-list">
+        <div className="sv-notes-list sv-anim-stagger-3">
           {notes.length === 0 && <div className="sv-token-empty">SIN NOTAS REGISTRADAS.</div>}
           {notes.map((note) => (
             <div key={note.id} className="sv-note-card">

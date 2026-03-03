@@ -1,0 +1,359 @@
+/* =============================================================
+   _animations.css
+   Global animation enhancements
+   View transitions, stagger system, component micro-interactions
+   ============================================================= */
+
+/* ---- View transition system ---- */
+
+.sv-shell-body {
+  transition: opacity var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease),
+              transform var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease);
+}
+
+.sv-shell-body.sv-view-entering {
+  opacity: 0;
+  transform: translateY(12px) scale(0.985);
+}
+
+.sv-shell-body.sv-view-idle {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* ---- Staggered entrance system ---- */
+
+@keyframes sv-stagger-enter {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.sv-anim-stagger-1,
+.sv-anim-stagger-2,
+.sv-anim-stagger-3,
+.sv-anim-stagger-4 {
+  opacity: 0;
+  animation: sv-stagger-enter var(--sv-dur-enter, 0.65s) var(--sv-ease-spring, ease) forwards;
+}
+
+.sv-anim-stagger-1 { animation-delay: 0.05s; }
+.sv-anim-stagger-2 { animation-delay: 0.12s; }
+.sv-anim-stagger-3 { animation-delay: 0.2s; }
+.sv-anim-stagger-4 { animation-delay: 0.3s; }
+
+/* ---- Dashboard enter ---- */
+
+@keyframes sv-dash-enter {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+    filter: blur(3px);
+  }
+  60% { filter: blur(0); }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+.sv-token-dash,
+.sv-roadmap-dash,
+.sv-notes-dash,
+.sv-overview-dash,
+.sv-timer-dash,
+.sv-focus-dash,
+.sv-draglists-dash {
+  animation: sv-dash-enter var(--sv-dur-enter, 0.65s) var(--sv-ease-spring, ease) forwards;
+}
+
+/* ---- Panel slide in (shared keyframe) ---- */
+
+@keyframes sv-panel-slide-in {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.96);
+    filter: blur(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: blur(0);
+  }
+}
+
+/* ---- Sidebar ---- */
+
+.sv-sidebar {
+  transition: width var(--sv-dur-slow, 0.55s) var(--sv-ease-spring, ease),
+              min-width var(--sv-dur-slow, 0.55s) var(--sv-ease-spring, ease);
+}
+
+.sv-sidebar-item {
+  transition: background var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease),
+              box-shadow var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease);
+}
+
+.sv-sidebar-item:hover { transform: translateX(3px); }
+.sv-sidebar-item.active { transform: translateX(0); }
+
+/* ---- Cards ---- */
+
+.sv-overview-card {
+  transition: transform var(--sv-dur-base, 0.35s) var(--sv-ease-spring, ease),
+              box-shadow var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease),
+              border-color var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease),
+              background var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease);
+}
+
+.sv-overview-card:hover {
+  transform: translateY(-3px) scale(1.015);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3),
+              0 0 0 1px rgba(255, 255, 255, 0.06);
+}
+
+.sv-overview-card:active {
+  transform: translateY(-1px) scale(0.99);
+  transition-duration: 0.1s;
+}
+
+/* ---- Buttons ---- */
+
+.sv-btn {
+  transition: transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease),
+              background var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              border-color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              box-shadow var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              opacity var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease);
+}
+
+.sv-btn:hover  { transform: translateY(-1px); }
+.sv-btn:active { transform: translateY(0) scale(0.97); transition-duration: 0.08s; }
+
+/* ---- Inputs ---- */
+
+.sv-input {
+  transition: border-color var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease),
+              box-shadow var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease),
+              background var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease);
+}
+
+.sv-input:focus {
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.06),
+              0 0 20px rgba(255, 255, 255, 0.03);
+}
+
+/* ---- Token bars ---- */
+
+.sv-token-bar-fill {
+  transition: width 0.8s var(--sv-ease-spring, ease);
+}
+
+/* ---- Analytics bar fill on mount ---- */
+
+.sv-analytics-bars .sv-token-bar-fill {
+  animation: sv-bar-fill-anim 1.2s var(--sv-ease-spring, ease) forwards;
+  transform-origin: left;
+}
+
+@keyframes sv-bar-fill-anim {
+  from { transform: scaleX(0); opacity: 0.5; }
+  to   { transform: scaleX(1); opacity: 1; }
+}
+
+/* ---- Wellness card ---- */
+
+.sv-wellness-card {
+  transition: transform var(--sv-dur-base, 0.35s) var(--sv-ease-spring, ease),
+              border-color var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease),
+              box-shadow var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease);
+}
+
+.sv-wellness-card:hover { transform: scale(1.02); }
+
+.sv-wellness-alert {
+  animation: sv-wellness-pulse 2.5s var(--sv-ease-smooth, ease) infinite;
+}
+
+@keyframes sv-wellness-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 68, 102, 0); }
+  50%      { box-shadow: 0 0 16px 4px rgba(255, 68, 102, 0.15); }
+}
+
+/* ---- Token log items ---- */
+
+.sv-token-log-item {
+  transition: transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease),
+              opacity var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease);
+}
+
+.sv-token-log-item:hover { transform: translateX(4px); }
+
+/* ---- Roadmap ---- */
+
+.sv-roadmap-phase-body {
+  animation: sv-accordion-open 0.4s var(--sv-ease-spring, ease) forwards;
+  overflow: hidden;
+}
+
+@keyframes sv-accordion-open {
+  from { opacity: 0; max-height: 0; transform: translateY(-8px); }
+  to   { opacity: 1; max-height: 2000px; transform: translateY(0); }
+}
+
+.sv-roadmap-phase-header {
+  transition: background var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease);
+}
+
+.sv-roadmap-phase-header:hover { transform: translateX(2px); }
+
+.sv-roadmap-topic {
+  transition: transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease),
+              background var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease);
+}
+
+.sv-roadmap-topic:hover { transform: translateX(4px); }
+
+/* ---- Timer ---- */
+
+.sv-timer-ring-svg circle {
+  transition: stroke-dashoffset 0.6s var(--sv-ease-spring, ease),
+              stroke 0.3s var(--sv-ease-smooth, ease);
+}
+
+/* ---- Focus table ---- */
+
+.sv-focus-node {
+  transition: transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease),
+              box-shadow var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              opacity 0.15s var(--sv-ease-smooth, ease);
+}
+
+.sv-focus-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+}
+
+.sv-focus-node[draggable]:active { opacity: 0.7; transform: scale(0.96); }
+
+.sv-focus-tab {
+  transition: background var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              border-color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease);
+}
+
+.sv-focus-tab:hover  { transform: translateY(-1px); }
+.sv-focus-tab:active { transform: scale(0.97); }
+
+/* ---- Drag lists ---- */
+
+.sv-draglist-item {
+  transition: transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease),
+              background var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              box-shadow var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease);
+}
+
+.sv-draglist-item:hover {
+  transform: translateX(3px);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.sv-draglist-item[draggable]:active { transform: scale(0.97); opacity: 0.7; }
+
+/* ---- Note card ---- */
+
+.sv-note-card {
+  transition: transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease),
+              border-color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease);
+}
+
+.sv-note-card:hover { transform: translateX(3px); }
+
+/* ---- Note form ---- */
+
+.sv-note-form {
+  animation: sv-panel-slide-in 0.45s var(--sv-ease-spring, ease) forwards;
+}
+
+/* ---- Burn form ---- */
+
+.sv-burn-form {
+  animation: sv-panel-slide-in 0.4s var(--sv-ease-spring, ease) forwards;
+}
+
+/* ---- Method toggle ---- */
+
+.sv-method-btn {
+  transition: background var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              border-color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease);
+}
+
+.sv-method-btn:hover  { transform: translateY(-1px); }
+.sv-method-btn:active { transform: translateY(0) scale(0.97); }
+
+/* ---- Token selector ---- */
+
+.sv-token-select-btn {
+  transition: transform var(--sv-dur-fast, 0.2s) var(--sv-ease-spring, ease),
+              border-color var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease),
+              box-shadow var(--sv-dur-fast, 0.2s) var(--sv-ease-smooth, ease);
+}
+
+.sv-token-select-btn:hover  { transform: translateY(-2px); }
+.sv-token-select-btn:active { transform: scale(0.95); }
+.sv-token-select-btn.active { transform: translateY(-2px) scale(1.03); box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3); }
+
+/* ---- Tip card ---- */
+
+.sv-tip-card {
+  transition: transform var(--sv-dur-base, 0.35s) var(--sv-ease-spring, ease),
+              box-shadow var(--sv-dur-base, 0.35s) var(--sv-ease-smooth, ease);
+}
+
+.sv-tip-card:hover { transform: translateY(-2px); }
+
+/* ---- Music player ---- */
+
+.sv-music-body {
+  animation: sv-music-expand 0.4s var(--sv-ease-spring, ease) forwards;
+}
+
+@keyframes sv-music-expand {
+  from { opacity: 0; max-height: 0; transform: translateY(-8px); }
+  to   { opacity: 1; max-height: 200px; transform: translateY(0); }
+}
+
+/* ---- Status dot breathing ---- */
+
+.sv-status-dot {
+  animation: sv-status-breathe 3s var(--sv-ease-smooth, ease) infinite;
+}
+
+@keyframes sv-status-breathe {
+  0%, 100% { box-shadow: 0 0 4px rgba(0, 255, 136, 0.4); opacity: 0.8; }
+  50%      { box-shadow: 0 0 12px rgba(0, 255, 136, 0.7); opacity: 1; }
+}
+
+/* ---- Scrollbar suppression ---- */
+
+.sv-shell-body {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sv-shell-body::-webkit-scrollbar { display: none; }

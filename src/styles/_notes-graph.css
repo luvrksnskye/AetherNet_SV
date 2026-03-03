@@ -1,0 +1,237 @@
+/* =============================================================
+   _notes-graph.css
+   Force graph SVG, notes overlay panel, node color picker
+   ============================================================= */
+
+/* ---- Graph wrap ---- */
+
+.sv-graph-wrap {
+  position: relative;
+  margin-top: 1rem;
+}
+
+.sv-graph-svg {
+  width: 100%;
+  height: 500px;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.sv-graph-svg #edges path.link {
+  fill: none;
+  stroke: #666;
+  stroke-width: 1.5px;
+}
+
+.sv-graph-svg #nodes g circle {
+  cursor: grab;
+  stroke: black;
+  stroke-width: 1.5px;
+  transition: r 0.3s var(--sv-ease-spring, ease),
+              fill 0.2s var(--sv-ease-smooth, ease);
+}
+
+.sv-graph-svg #nodes g circle:active {
+  cursor: grabbing;
+}
+
+.sv-graph-svg #nodes g circle.pinned {
+  fill: orange;
+}
+
+.sv-graph-empty {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'SV-Tech', monospace;
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: rgba(255, 255, 255, 0.25);
+}
+
+/* ---- Legacy graph detail (below graph, backwards compat) ---- */
+
+.sv-graph-detail {
+  position: relative;
+  margin-top: 1rem;
+  padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: sv-panel-slide-in 0.45s var(--sv-ease-spring, ease) forwards;
+}
+
+/* ---- Notes overlay (centered over graph) ---- */
+
+.sv-notes-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.3);
+  backdrop-filter: blur(3px);
+  transition: opacity 0.35s var(--sv-ease-smooth, ease);
+  cursor: none;
+}
+
+.sv-notes-overlay-visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.sv-notes-overlay-hidden {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.sv-notes-detail-panel {
+  position: relative;
+  width: min(480px, 90%);
+  max-height: 85%;
+  overflow-y: auto;
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.88);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  animation: sv-panel-center-in 0.45s var(--sv-ease-spring, ease) forwards;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.sv-notes-overlay-hidden .sv-notes-detail-panel {
+  animation: sv-panel-center-out 0.3s var(--sv-ease-accel, ease) forwards;
+}
+
+.sv-notes-detail-panel::-webkit-scrollbar {
+  display: none;
+}
+
+.sv-notes-detail-panel .sv-hex-detail-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1rem;
+}
+
+.sv-notes-detail-panel .sv-detail-title {
+  font-family: 'SV-Tech', monospace;
+  font-size: 0.95rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  margin: 0;
+}
+
+.sv-notes-detail-panel .sv-detail-cat {
+  font-size: 0.55rem;
+  letter-spacing: 0.1em;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.sv-notes-detail-panel .sv-detail-desc {
+  font-size: 0.75rem;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 0.5rem 0;
+}
+
+.sv-notes-detail-panel .sv-detail-close {
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5);
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: none;
+  transition: all 0.2s var(--sv-ease-smooth, ease);
+}
+
+.sv-notes-detail-panel .sv-detail-close:hover {
+  background: rgba(255, 68, 102, 0.15);
+  border-color: rgba(255, 68, 102, 0.4);
+  color: #ff4466;
+  transform: scale(1.1);
+}
+
+.sv-notes-detail-panel .sv-corner {
+  animation: sv-corner-pulse-hex 3.5s var(--sv-ease-smooth, ease) infinite;
+}
+
+/* ---- Notes list enhanced entrance ---- */
+
+.sv-notes-list .sv-note-card {
+  animation: sv-list-item-enter 0.4s var(--sv-ease-spring, ease) both;
+}
+
+.sv-notes-list .sv-note-card:nth-child(1) { animation-delay: 0.03s; }
+.sv-notes-list .sv-note-card:nth-child(2) { animation-delay: 0.06s; }
+.sv-notes-list .sv-note-card:nth-child(3) { animation-delay: 0.09s; }
+.sv-notes-list .sv-note-card:nth-child(4) { animation-delay: 0.12s; }
+.sv-notes-list .sv-note-card:nth-child(5) { animation-delay: 0.15s; }
+.sv-notes-list .sv-note-card:nth-child(n+6) { animation-delay: 0.18s; }
+
+@keyframes sv-list-item-enter {
+  from { opacity: 0; transform: translateX(-12px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* ---- Node color picker ---- */
+
+.sv-node-color-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 0.25rem 0;
+}
+
+.sv-node-color-btn {
+  width: 28px;
+  height: 28px;
+  border: 2px solid transparent;
+  cursor: none;
+  transition: all 0.2s var(--sv-ease-spring, ease);
+}
+
+.sv-node-color-btn:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 8px rgba(255, 255, 255, 0.2);
+}
+
+.sv-node-color-btn.sv-node-color-active {
+  border-color: white;
+  box-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+  transform: scale(1.15);
+}
+
+.sv-node-color-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.sv-node-color-picker {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  animation: sv-panel-slide-in 0.2s ease-out;
+}
+
+/* ---- Responsive ---- */
+
+@media (max-width: 768px) {
+  .sv-graph-svg { height: 350px; }
+}
+
+@media (max-width: 480px) {
+  .sv-node-color-btn {
+    width: 22px;
+    height: 22px;
+  }
+}

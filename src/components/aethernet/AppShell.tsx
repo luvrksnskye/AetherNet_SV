@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { TokenDashboard } from '../features/TokenDashboard';
 import { RoadmapDashboard } from '../features/RoadmapDashboard';
 import { NotesPanel } from '../features/NotesPanel';
@@ -9,12 +9,14 @@ import { DragLists } from '../features/DragLists';
 import { HexGrid } from '../features/HexGrid';
 import { MusicPlayer } from '../features/MusicPlayer';
 import type { DashboardView } from '../../types';
+import type { SFXKey } from '../../hooks/useSVSounds';
 
 const VIDEO_BG =
   'https://dl.dropbox.com/scl/fi/qxh4lv0qcydnw9str6gju/bg-alt.mp4?rlkey=caqgw260cqamexollkco4wu3p&st=we2x7r1a&dl=0';
 
 interface AppShellProps {
   onSound: (key: 'click' | 'hover') => void;
+  onSoundFx?: (key: SFXKey, volume?: number) => void;
   onLogout: () => void;
 }
 
@@ -29,12 +31,23 @@ const NAV_ITEMS: { id: DashboardView; label: string; icon: string }[] = [
   { id: 'notes', label: 'BITACORA', icon: '\u270E' },
 ];
 
-export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
+/* SFX rotation for navigation clicks */
+const NAV_CLICK_SOUNDS: SFXKey[] = ['click', 'click3', 'click5'];
+
+export const AppShell: React.FC<AppShellProps> = ({
+  onSound,
+  onSoundFx,
+  onLogout,
+}) => {
   const [view, setView] = useState<DashboardView>('overview');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [shellReady, setShellReady] = useState(false);
+  const [viewTransition, setViewTransition] = useState<'entering' | 'idle'>(
+    'idle',
+  );
+  const navClickIdx = useRef(0);
+  const bodyRef = useRef<HTMLDivElement>(null);
 
-  // Defer heavy components until shell is painted
   useEffect(() => {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
@@ -43,12 +56,43 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
     });
   }, []);
 
+  const playFx = useCallback(
+    (key: SFXKey, volume?: number) => {
+      if (onSoundFx) onSoundFx(key, volume);
+      else if (key === 'click' || key === 'hover') onSound(key);
+    },
+    [onSound, onSoundFx],
+  );
+
   const navigate = useCallback(
     (v: DashboardView) => {
-      setView(v);
-      onSound('click');
+      if (v === view) return;
+
+      /* Play a rotating click variant */
+      const sfx = NAV_CLICK_SOUNDS[navClickIdx.current % NAV_CLICK_SOUNDS.length];
+      navClickIdx.current++;
+      playFx(sfx, 0.4);
+
+      /* Start exit transition */
+      setViewTransition('entering');
+
+      /* Scroll body to top */
+      if (bodyRef.current) {
+        bodyRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      /* Swap view after a short delay to let exit anim play */
+      requestAnimationFrame(() => {
+        setTimeout(() => {
+          setView(v);
+          /* Let entering anim begin */
+          requestAnimationFrame(() => {
+            setTimeout(() => setViewTransition('idle'), 50);
+          });
+        }, 180);
+      });
     },
-    [onSound]
+    [view, playFx],
   );
 
   const renderContent = () => {
@@ -66,7 +110,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
       case 'lists':
         return <DragLists onSound={onSound} />;
       case 'hexgrid':
-        return <HexGrid onSound={onSound} />;
+        return <HexGrid onSound={onSound} onSoundFx={onSoundFx ? (k, v) => playFx(k, v) : undefined} />;
       case 'overview':
       default:
         return (
@@ -103,21 +147,24 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
               className="sv-sidebar-toggle"
               onClick={() => {
                 setSidebarOpen(!sidebarOpen);
-                onSound('click');
+                playFx('click2', 0.35);
               }}
-              onMouseEnter={() => onSound('hover')}
+              onMouseEnter={() => playFx('hover', 0.15)}
             >
               {sidebarOpen ? '\u25C0' : '\u25B6'}
             </button>
           </div>
 
           <nav className="sv-sidebar-nav">
-            {NAV_ITEMS.map((item) => (
+            {NAV_ITEMS.map((item, i) => (
               <button
                 key={item.id}
                 className={`sv-sidebar-item ${view === item.id ? 'active' : ''}`}
+                style={
+                  { '--nav-index': i } as React.CSSProperties
+                }
                 onClick={() => navigate(item.id)}
-                onMouseEnter={() => onSound('hover')}
+                onMouseEnter={() => playFx('hover', 0.12)}
                 title={item.label}
               >
                 <span className="sv-sidebar-icon">{item.icon}</span>
@@ -141,10 +188,10 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
             <button
               className="sv-sidebar-logout"
               onClick={() => {
-                onSound('click');
+                playFx('takeout', 0.4);
                 onLogout();
               }}
-              onMouseEnter={() => onSound('hover')}
+              onMouseEnter={() => playFx('hover', 0.15)}
             >
               {sidebarOpen ? 'DESCONECTAR' : '\u23FB'}
             </button>
@@ -166,7 +213,12 @@ export const AppShell: React.FC<AppShellProps> = ({ onSound, onLogout }) => {
             </div>
           </div>
 
-          <div className="sv-shell-body">{renderContent()}</div>
+          <div
+            ref={bodyRef}
+            className={`sv-shell-body ${viewTransition === 'entering' ? 'sv-view-entering' : 'sv-view-idle'}`}
+          >
+            {renderContent()}
+          </div>
         </main>
       </div>
 

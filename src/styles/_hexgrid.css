@@ -1,0 +1,466 @@
+/* =============================================================
+   _hexgrid.css
+   Honeycomb layout - matches reference SCSS
+   Rounded clip-path, aspect-ratio: 1, vmin sizing
+   White/visible empties, backdrop-filter blur, no icons
+   ============================================================= */
+
+/* ---- Clip-path as custom property (rounded hex) ---- */
+:root {
+  --sv-hex-clip: polygon(
+    98.66024% 45%, 99.39693% 46.5798%, 99.84808% 48.26352%,
+    100% 50%,
+    99.84808% 51.73648%, 99.39693% 53.4202%, 98.66025% 55%,
+    78.66025% 89.64102%, 77.66044% 91.06889%, 76.42788% 92.30146%,
+    75% 93.30127%, 73.4202% 94.03794%, 71.73648% 94.48909%, 70% 94.64102%,
+    30% 94.64102%, 28.26352% 94.48909%, 26.5798% 94.03794%,
+    25% 93.30127%, 23.57212% 92.30146%, 22.33956% 91.06889%, 21.33975% 89.64102%,
+    1.33975% 55%, 0.60307% 53.4202%, 0.15192% 51.73648%,
+    0% 50%,
+    0.15192% 48.26352%, 0.60307% 46.5798%, 1.33975% 45%,
+    21.33975% 10.35898%, 22.33956% 8.93111%, 23.57212% 7.69854%,
+    25% 6.69873%, 26.5798% 5.96206%, 28.26352% 5.51091%, 30% 5.35898%,
+    70% 5.35898%, 71.73648% 5.51091%, 73.4202% 5.96206%,
+    75% 6.69873%, 76.42788% 7.69854%, 77.66044% 8.93111%, 78.66025% 10.35898%
+  );
+  --sv-hex-size: 8vmin;
+}
+
+/* ---- Dashboard wrapper ---- */
+.sv-hexgrid-dash {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 100%;
+  animation: sv-dash-enter var(--sv-dur-enter, 0.65s) var(--sv-ease-spring, ease-out) forwards;
+}
+
+/* ---- Toolbar ---- */
+.sv-hex-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* ---- Form ---- */
+.sv-hex-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.sv-hex-form-wrapper {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: max-height 0.5s var(--sv-ease-spring, ease),
+              opacity 0.35s var(--sv-ease-smooth, ease),
+              margin 0.35s var(--sv-ease-smooth, ease);
+  margin-bottom: 0;
+}
+
+.sv-hex-form-wrapper.sv-hex-form-open {
+  max-height: 500px;
+  opacity: 1;
+  margin-bottom: 1rem;
+}
+
+/* ---- Main area (grid + overlay parent) ---- */
+.sv-hex-main-area {
+  position: relative;
+  min-height: 300px;
+}
+
+/* ==========================
+   CONTAINER  (flex row of columns)
+   ========================== */
+.sv-hex-container {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 0;
+  transition: opacity 0.5s var(--sv-ease-spring, ease),
+              transform 0.5s var(--sv-ease-spring, ease),
+              filter 0.5s var(--sv-ease-smooth, ease);
+}
+
+.sv-hex-container.sv-hex-has-selection {
+  opacity: 0.35;
+  transform: scale(0.92);
+  filter: blur(2px);
+  pointer-events: none;
+}
+
+.sv-hex-container.sv-hex-collapsed {
+  min-height: 120px;
+  opacity: 0.4;
+}
+
+.sv-hex-container.sv-hex-collapsed .sv-hex-cell {
+  transform: scale(0.7);
+}
+
+/* ==========================
+   COLUMNS
+   ========================== */
+.sv-hex-column {
+  margin: 0 -0.2vmin;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Even columns offset down by half a hex */
+.sv-hex-column:nth-child(even) {
+  margin-top: calc(var(--sv-hex-size) / 2);
+}
+
+/* ==========================
+   HEX CELL  (outer shape)
+   ========================== */
+.sv-hex-cell {
+  width: var(--sv-hex-size);
+  aspect-ratio: 1;
+  position: relative;
+  clip-path: var(--sv-hex-clip);
+  backdrop-filter: blur(1rem);
+  cursor: none;
+  transition: transform 0.35s var(--sv-ease-spring, ease),
+              filter 0.35s var(--sv-ease-smooth, ease),
+              opacity 0.35s var(--sv-ease-smooth, ease);
+}
+
+/* Kill legacy nth-child offset */
+.sv-hex-cell:nth-child(even) {
+  margin-top: 0;
+}
+
+/* ==========================
+   INNER SHAPE  (1px gap from outer)
+   ========================== */
+.sv-hex-shape {
+  position: absolute;
+  inset: 1px;
+  clip-path: var(--sv-hex-clip);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.35s var(--sv-ease-spring, ease);
+}
+
+/* ==========================
+   EMPTY CELLS  - white, visible, glass
+   ========================== */
+.sv-hex-empty {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.sv-hex-empty .sv-hex-shape {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.sv-hex-empty:hover {
+  filter: brightness(1.2);
+}
+
+.sv-hex-empty:hover .sv-hex-shape {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+/* Icon hidden - no icons in honeycomb */
+.sv-hex-icon {
+  display: none;
+}
+
+/* ==========================
+   FILLED CELLS
+   ========================== */
+.sv-hex-filled {
+  background: var(--hex-color, rgba(255, 255, 255, 0.3));
+}
+
+.sv-hex-filled .sv-hex-shape {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(1rem);
+}
+
+.sv-hex-filled:hover {
+  filter: brightness(1.2);
+  transform: scale(1.08);
+}
+
+.sv-hex-filled:hover .sv-hex-shape {
+  background: rgba(0, 0, 0, 0.35);
+}
+
+/* ==========================
+   SELECTED
+   ========================== */
+.sv-hex-selected {
+  filter: brightness(1.5);
+  transform: scale(1.12);
+  z-index: 2;
+}
+
+/* ==========================
+   CONTENT INSIDE HEX
+   ========================== */
+.sv-hex-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.35rem;
+  text-align: center;
+}
+
+.sv-hex-title {
+  font-family: 'SV-Tech', monospace;
+  font-size: max(0.35rem, 1vmin);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  color: white;
+  word-break: break-word;
+  line-height: 1.25;
+}
+
+.sv-hex-date {
+  font-size: max(0.28rem, 0.7vmin);
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.sv-hex-placeholder .sv-hex-title {
+  font-size: 1vmin;
+  color: rgba(255, 255, 255, 0.06);
+}
+
+/* ==========================
+   MOUNT ANIMATION (stagger)
+   ========================== */
+.sv-hex-mounted .sv-hex-cell {
+  animation: sv-hex-cell-enter 0.5s var(--sv-ease-spring, ease) both;
+  animation-delay: var(--cell-delay, 0ms);
+}
+
+@keyframes sv-hex-cell-enter {
+  from { opacity: 0; transform: scale(0.6); filter: blur(4px); }
+  to   { opacity: 1; transform: scale(1);   filter: blur(0); }
+}
+
+/* ==========================
+   RIPPLE  (matches reference exactly)
+   scale(1) > scale(ripple-factor) > opacity drop > scale(1.5)+blur > scale(1)
+   ========================== */
+.sv-hex-rippling {
+  pointer-events: none;
+}
+
+.sv-hex-rippling .sv-hex-cell {
+  --duration: 0.45s;
+  cursor: default;
+  animation: sv-hex-ripple var(--duration) ease-in-out;
+  animation-duration: max(var(--duration), calc(var(--duration) * var(--ripple-factor) / 100));
+  animation-delay: calc(var(--ripple-factor) * 8ms);
+}
+
+@keyframes sv-hex-ripple {
+  from {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(max(0.8, calc(var(--ripple-factor) / 100)));
+    opacity: 0.42;
+  }
+  65% {
+    opacity: 1;
+  }
+  70% {
+    transform: scale(1.5);
+    filter: blur(0.3rem);
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+/* ==========================
+   OVERLAY DETAIL PANEL
+   ========================== */
+.sv-hex-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(2px);
+  transition: opacity 0.35s var(--sv-ease-smooth, ease);
+  cursor: none;
+}
+
+.sv-hex-overlay-visible { opacity: 1; pointer-events: auto; }
+.sv-hex-overlay-hidden  { opacity: 0; pointer-events: none; }
+
+.sv-hex-detail-panel {
+  position: relative;
+  width: min(480px, 90%);
+  padding: 2rem;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  animation: sv-panel-center-in 0.45s var(--sv-ease-spring, ease) forwards;
+}
+
+.sv-hex-overlay-hidden .sv-hex-detail-panel {
+  animation: sv-panel-center-out 0.3s var(--sv-ease-accel, ease) forwards;
+}
+
+@keyframes sv-panel-center-in {
+  from { opacity: 0; transform: scale(0.88) translateY(16px); filter: blur(6px); }
+  to   { opacity: 1; transform: scale(1) translateY(0);       filter: blur(0); }
+}
+
+@keyframes sv-panel-center-out {
+  from { opacity: 1; transform: scale(1) translateY(0); }
+  to   { opacity: 0; transform: scale(0.92) translateY(10px); }
+}
+
+/* Panel internals */
+.sv-hex-detail-panel .sv-hex-detail-color-bar {
+  position: absolute; top: 0; left: 0; width: 100%; height: 3px; opacity: 0.8;
+}
+
+.sv-hex-detail-panel .sv-hex-detail-header,
+.sv-hex-detail-header {
+  display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem;
+}
+
+.sv-hex-detail-panel .sv-detail-title {
+  font-family: 'SV-Tech', monospace; font-size: 0.95rem; font-weight: 600;
+  letter-spacing: 0.15em; margin: 0;
+}
+
+.sv-hex-detail-panel .sv-detail-cat {
+  font-size: 0.55rem; letter-spacing: 0.1em; color: rgba(255, 255, 255, 0.4);
+}
+
+.sv-hex-detail-panel .sv-detail-desc {
+  font-size: 0.75rem; line-height: 1.7; color: rgba(255, 255, 255, 0.7);
+  margin: 0 0 1.25rem 0;
+}
+
+.sv-hex-detail-panel .sv-detail-close {
+  background: none; border: 1px solid rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.5); width: 30px; height: 30px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1rem; cursor: none;
+  transition: all 0.2s var(--sv-ease-smooth, ease);
+}
+
+.sv-hex-detail-panel .sv-detail-close:hover {
+  background: rgba(255, 68, 102, 0.15); border-color: rgba(255, 68, 102, 0.4);
+  color: #ff4466; transform: scale(1.1);
+}
+
+.sv-hex-detail-panel .sv-corner {
+  animation: sv-corner-pulse-hex 3.5s var(--sv-ease-smooth, ease) infinite;
+}
+
+@keyframes sv-corner-pulse-hex {
+  0%, 100% { opacity: 0.4; }
+  50%      { opacity: 0.8; }
+}
+
+/* ---- Legacy detail (below-grid compat) ---- */
+.sv-hex-detail {
+  position: relative; margin-top: 1rem; padding: 1.5rem;
+  background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  animation: sv-detail-slide-in 0.3s ease-out;
+}
+
+.sv-hex-detail-color-bar {
+  position: absolute; top: 0; left: 0; width: 100%; height: 3px;
+}
+
+/* ==========================
+   VISION-UI SWITCH
+   ========================== */
+.sv-hex-switch {
+  display: inline-flex; align-items: center; gap: 0.5rem;
+  padding: 0.35rem 0.75rem; border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(0, 0, 0, 0.3); cursor: none;
+  transition: all 0.35s var(--sv-ease-spring, ease);
+}
+
+.sv-hex-switch:hover {
+  border-color: rgba(255, 255, 255, 0.25); transform: translateY(-1px);
+}
+
+.sv-hex-switch.checked {
+  background: rgba(0, 255, 136, 0.08); border-color: rgba(0, 255, 136, 0.25);
+}
+
+.sv-hex-switch-label {
+  font-family: 'SV-Tech', monospace; font-size: 0.55rem;
+  letter-spacing: 0.15em; color: rgba(255, 255, 255, 0.6);
+  transition: color 0.3s var(--sv-ease-smooth, ease);
+}
+
+.sv-hex-switch.checked .sv-hex-switch-label { color: #00ff88; }
+
+/* ==========================
+   VISION-UI THEME
+   ========================== */
+.sv-hex-vision-ui .sv-hex-empty {
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.sv-hex-vision-ui .sv-hex-empty .sv-hex-shape {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.sv-hex-vision-ui .sv-hex-filled .sv-hex-shape {
+  background: rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0 0 20px rgba(0, 255, 136, 0.05);
+}
+
+.sv-hex-vision-ui .sv-hex-filled {
+  background: rgba(0, 255, 136, 0.25);
+}
+
+.sv-hex-vision-ui .sv-hex-title  { color: #00ff88; }
+.sv-hex-vision-ui .sv-hex-date   { color: rgba(0, 255, 136, 0.4); }
+
+/* ==========================
+   RESPONSIVE
+   vmin scales with viewport so on smaller screens
+   we increase the vmin multiplier to keep hexes usable
+   ========================== */
+@media (max-width: 960px) {
+  .sv-hex-cell { --sv-hex-size: 6.5vmin; }
+  .sv-hex-column:nth-child(even) { margin-top: 3.25vmin; }
+}
+
+@media (max-width: 768px) {
+  .sv-hex-cell { --sv-hex-size: 9vmin; }
+  .sv-hex-column:nth-child(even) { margin-top: 4.5vmin; }
+  .sv-hex-date { display: none; }
+  .sv-hex-detail-panel { width: 95%; padding: 1.25rem; }
+}
+
+@media (max-width: 480px) {
+  .sv-hex-cell { --sv-hex-size: 12vmin; }
+  .sv-hex-column:nth-child(even) { margin-top: 6vmin; }
+  .sv-hex-content { padding: 0.15rem; }
+}
